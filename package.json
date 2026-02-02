@@ -1,0 +1,14 @@
+{
+  "name": "proyectocuartagen2",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace @proyectocuartagen2/ApiVeterinaria run dev",
+    "dev:web": "npm --workspace @proyectocuartagen2/WebVeterinaria run dev",
+    "dev:mobile": "npm --workspace @proyectocuartagen2/MobileVeterinaria start",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:web\""
+  }
+}

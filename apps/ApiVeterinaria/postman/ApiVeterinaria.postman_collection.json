@@ -1,0 +1,524 @@
+{
+  "info": {
+    "_postman_id": "api-veterinaria",
+    "name": "Api Veterinaria",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Propietarios",
+      "item": [
+        {
+          "name": "Listar propietarios (paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/propietarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "propietarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar propietarios (search param)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/propietarios?search=Juan",
+              "host": ["{{baseUrl}}"],
+              "path": ["propietarios"],
+              "query": [
+                { "key": "search", "value": "Juan" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar propietarios (q)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/propietarios/search?q=Juan",
+              "host": ["{{baseUrl}}"],
+              "path": ["propietarios","search"],
+              "query": [
+                { "key": "q", "value": "Juan" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar propietarios por términos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"search\": \"Juan\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/propietarios/search", "host": ["{{baseUrl}}"], "path": ["propietarios","search"] }
+          }
+        },
+        {
+          "name": "Buscar propietarios por campos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+5411123\",\n  \"correo\": \"gmail.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/propietarios/search", "host": ["{{baseUrl}}"], "path": ["propietarios","search"] }
+          }
+        },
+        {
+          "name": "Get propietario by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/propietarios/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["propietarios","1"]
+            }
+          }
+        },
+        {
+          "name": "Crear propietario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/propietarios", "host": ["{{baseUrl}}"], "path": ["propietarios"] }
+          }
+        },
+        {
+          "name": "Actualizar propietario",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos Alberto\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/propietarios/1", "host": ["{{baseUrl}}"], "path": ["propietarios","1"] }
+          }
+        },
+        {
+          "name": "Eliminar propietario",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/propietarios/1", "host": ["{{baseUrl}}"], "path": ["propietarios","1"] }
+          }
+        },
+        {
+          "name": "Estadísticas propietarios",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/propietarios/stats", "host": ["{{baseUrl}}"], "path": ["propietarios","stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mascotas",
+      "item": [
+        {
+          "name": "Listar mascotas (paginated)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas", "host": ["{{baseUrl}}"], "path": ["mascotas"] }
+            }
+        },
+        {
+          "name": "Propietarios de mascotas (paginated)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/propietarios", "host": ["{{baseUrl}}"], "path": ["mascotas","propietarios"] }
+            }
+        },
+        {
+          "name": "Buscar propietarios de mascotas (q)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/propietarios/search?q=Juan", "host": ["{{baseUrl}}"], "path": ["mascotas","propietarios","search"], "query": [{ "key": "q", "value": "Juan" }] }
+            }
+        },
+        {
+          "name": "Buscar propietarios de mascotas (search param)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/propietarios?search=Juan", "host": ["{{baseUrl}}"], "path": ["mascotas","propietarios"], "query": [{ "key": "search", "value": "Juan" }] }
+            }
+        },
+        {
+          "name": "Buscar propietarios de mascotas por términos (POST)",
+          "request": {
+              "method": "POST",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"search\": \"Juan\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas/propietarios/search", "host": ["{{baseUrl}}"], "path": ["mascotas","propietarios","search"] }
+            }
+        },
+        {
+          "name": "Buscar propietarios de mascotas por campos (POST)",
+          "request": {
+              "method": "POST",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"propietario\": \"Juan\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas/propietarios/search", "host": ["{{baseUrl}}"], "path": ["mascotas","propietarios","search"] }
+            }
+        },
+        {
+          "name": "Buscar mascotas (q)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/search?q=Fido", "host": ["{{baseUrl}}"], "path": ["mascotas","search"], "query": [{ "key": "q", "value": "Fido" }] }
+            }
+        },
+        {
+          "name": "Buscar mascotas (search param)",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas?search=Fido", "host": ["{{baseUrl}}"], "path": ["mascotas"], "query": [{ "key": "search", "value": "Fido" }] }
+            }
+        },
+        {
+          "name": "Buscar mascotas por términos (POST)",
+          "request": {
+              "method": "POST",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"search\": \"Fido\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas/search", "host": ["{{baseUrl}}"], "path": ["mascotas","search"] }
+            }
+        },
+        {
+          "name": "Get mascota by id",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/1", "host": ["{{baseUrl}}"], "path": ["mascotas","1"] }
+            }
+        },
+        {
+          "name": "Crear mascota",
+          "request": {
+              "method": "POST",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"propietario\": 1,\n  \"nombre\": \"Fido\",\n  \"especie\": \"Canino\",\n  \"raza\": \"Labrador\",\n  \"edad\": \"3 años\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas", "host": ["{{baseUrl}}"], "path": ["mascotas"] }
+            }
+        },
+        {
+          "name": "Buscar mascotas por campos (POST)",
+          "request": {
+              "method": "POST",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"propietario\": 1,\n  \"nombre\": \"Fi\",\n  \"especie\": \"Canino\",\n  \"raza\": \"Labrador\",\n  \"edad\": \"3\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas/search", "host": ["{{baseUrl}}"], "path": ["mascotas","search"] }
+            }
+        },
+        {
+          "name": "Actualizar mascota",
+          "request": {
+              "method": "PUT",
+              "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "body": { "mode": "raw", "raw": "{\n  \"propietario\": 1,\n  \"nombre\": \"Fido II\",\n  \"especie\": \"Canino\",\n  \"raza\": \"Labrador\",\n  \"edad\": \"4 años\"\n}" },
+              "url": { "raw": "{{baseUrl}}/mascotas/1", "host": ["{{baseUrl}}"], "path": ["mascotas","1"] }
+            }
+        },
+        {
+          "name": "Eliminar mascota",
+          "request": {
+              "method": "DELETE",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/1", "host": ["{{baseUrl}}"], "path": ["mascotas","1"] }
+            }
+        },
+        {
+          "name": "Estadísticas mascotas",
+          "request": {
+              "method": "GET",
+              "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+              "url": { "raw": "{{baseUrl}}/mascotas/stats", "host": ["{{baseUrl}}"], "path": ["mascotas","stats"] }
+            }
+        }
+      ]
+    }
+    ,
+    {
+      "name": "HistorialMedico",
+      "item": [
+        {
+          "name": "Listar historiales (paginated)",
+    "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] } }
+        },
+        {
+          "name": "Buscar historiales (q)",
+    "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/search?q=fiebre", "host": ["{{baseUrl}}"], "path": ["historiales","search"], "query": [{ "key": "q", "value": "fiebre" }] } }
+        },
+        {
+          "name": "Buscar historiales (search param)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/historiales?search=fiebre", "host": ["{{baseUrl}}"], "path": ["historiales"], "query": [{ "key": "search", "value": "fiebre" }] }
+          }
+        },
+        {
+          "name": "Buscar historiales por términos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"search\": \"fiebre\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales/search", "host": ["{{baseUrl}}"], "path": ["historiales","search"] }
+          }
+        },
+        {
+          "name": "Get historial by id",
+    "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/1", "host": ["{{baseUrl}}"], "path": ["historiales","1"] } }
+        },
+        {
+          "name": "Crear historial",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"mascota\": 1,\n  \"fechaAtencion\": \"2025-11-01T10:00:00Z\",\n  \"motivo\": \"Consulta por vómitos\",\n  \"diagnostico\": \"Probable gastroenteritis\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] }
+          }
+        },
+        {
+          "name": "Buscar historiales por campos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"mascota\": 1,\n  \"motivo\": \"vómito\",\n  \"diagnostico\": \"gastroenteritis\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales/search", "host": ["{{baseUrl}}"], "path": ["historiales","search"] }
+          }
+        },
+        {
+          "name": "Buscar historiales por rango de fecha (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fechaDesde\": \"2025-11-01T00:00:00Z\",\n  \"fechaHasta\": \"2025-11-02T23:59:59Z\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales/search", "host": ["{{baseUrl}}"], "path": ["historiales","search"] }
+          }
+        },
+        {
+          "name": "Actualizar historial",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"mascota\": 1,\n  \"fechaAtencion\": \"2025-11-02T11:00:00Z\",\n  \"motivo\": \"Revisión seguimiento\",\n  \"diagnostico\": \"Mejoría\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales/1", "host": ["{{baseUrl}}"], "path": ["historiales","1"] }
+          }
+        },
+        {
+          "name": "Eliminar historial",
+    "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/1", "host": ["{{baseUrl}}"], "path": ["historiales","1"] } }
+        },
+        {
+          "name": "Estadísticas historiales",
+    "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/stats", "host": ["{{baseUrl}}"], "path": ["historiales","stats"] } }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios (paginated)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Buscar usuarios (search param)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users?search=Juan", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "search", "value": "Juan" }] }
+          }
+        },
+        {
+          "name": "Buscar usuarios (q)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/search?q=Juan", "host": ["{{baseUrl}}"], "path": ["users","search"], "query": [{ "key": "q", "value": "Juan" }] }
+          }
+        },
+        {
+          "name": "Buscar usuarios por términos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"search\": \"Juan\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/search", "host": ["{{baseUrl}}"], "path": ["users","search"] }
+          }
+        },
+        {
+          "name": "Buscar usuarios por campos (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": 1,\n  \"nombre\": \"Juan\",\n  \"email\": \"juan@\",\n  \"telefono\": \"+54\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/search", "host": ["{{baseUrl}}"], "path": ["users","search"] }
+          }
+        },
+        {
+          "name": "Buscar usuarios por rango de fecha (POST)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"fechaDesde\": \"2025-11-01T00:00:00Z\",\n  \"fechaHasta\": \"2025-11-02T23:59:59Z\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/search", "host": ["{{baseUrl}}"], "path": ["users","search"] }
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users","1"] }
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+541112345678\",\n  \"password\": \"P@ssw0rd!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+541112345679\"\n}" },
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users","1"] }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users","1"] }
+          }
+        },
+        {
+          "name": "Estadísticas usuarios",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/users/stats", "host": ["{{baseUrl}}"], "path": ["users","stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Perez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+541112345678\",\n  \"password\": \"P@ssw0rd!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"P@ssw0rd!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth","refresh"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth","logout"] }
+          }
+        }
+      ]
+    }
+  ]
+}
