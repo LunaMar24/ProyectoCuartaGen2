@@ -1,5 +1,5 @@
 {
-  "name": "express-mysql-crud",
+  "name": "@proyectocuartagen2/apiveterinaria",
   "version": "1.0.0",
   "description": "API REST con Express y MySQL para gestión de usuarios",
   "license": "ISC",
