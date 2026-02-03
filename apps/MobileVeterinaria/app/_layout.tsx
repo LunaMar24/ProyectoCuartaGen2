@@ -32,7 +32,7 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('http://10.0.2.2:3000/api/v1/auth/login', {
+      const res = await fetch('http://10.0.2.2:3000/api/v1/auth/login', { //Conexion a API Localhost
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -41,6 +41,7 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
       if (data?.success && data.data.token) {
         await AsyncStorage.setItem('authToken', data.data.token);
         onLogin(data.data.token, data.data.user);
+        setError('Credenciales correctas');
         //router.push({ pathname: '/screens/UserDetailsScreen', params: { user: data.data.user } });
       } else {
         setError(data?.message || 'Credenciales incorrectas');
@@ -108,7 +109,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} />
+        {/* <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} /> */}
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
