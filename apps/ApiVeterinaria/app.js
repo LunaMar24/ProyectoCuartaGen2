@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
         ? ['https://tu-dominio.com'] // Cambiar por tu dominio en producción
-        : ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000'],
+        : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
