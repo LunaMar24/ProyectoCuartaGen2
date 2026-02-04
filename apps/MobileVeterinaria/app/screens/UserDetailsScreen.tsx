@@ -1,38 +1,43 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { useAuth } from '../../context/AuthContext';
 
-type UserDetailsScreenProps = {
-  route: {
-    params: {
-      user: {
-        id: string;
-        nombre: string;
-        email: string;
-        telefono: string;
-        fecha_creacion: string;
-        fecha_actualizacion: string;
-      };
-    };
-  };
-};
+export default function UserDetailsScreen() {
+  const { user, logout } = useAuth();
 
-export default function UserDetailsScreen({ route }: UserDetailsScreenProps) {
-  const { user } = route.params;
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Error</Text>
+        <Text style={styles.info}>No se encontraron los detalles del usuario.</Text>
+        <Button title="Cerrar sesión" onPress={logout} color="#f43f5e" />
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>¡Bienvenid@ {user.nombre}!</Text>
       <Text style={styles.info}>Email: {user.email}</Text>
       <Text style={styles.info}>Teléfono: {user.telefono}</Text>
-      <Text style={styles.info}>Usuario Desde: {new Date(user.fecha_creacion).toLocaleDateString()}</Text>
-      <Text style={styles.info}>Última Actualización: {new Date(user.fecha_actualizacion).toLocaleDateString()}</Text>
-    </View>
+      <Text style={styles.info}>
+        Usuario Desde: {new Date(user.fecha_creacion).toLocaleDateString()}
+      </Text>
+      <Text style={styles.info}>
+        Última Actualización: {new Date(user.fecha_actualizacion).toLocaleDateString()}
+      </Text>
+      <Button title="Cerrar sesión" onPress={logout} color="#f43f5e" />
+    </ScrollView>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#18181b',
     alignItems: 'center',
     justifyContent: 'center',
