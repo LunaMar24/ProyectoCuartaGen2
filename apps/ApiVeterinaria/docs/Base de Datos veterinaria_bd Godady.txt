@@ -1,0 +1,3 @@
+Base de Datos: veterinaria_bd
+usuario: vete_adminuser
+clave: w_4S*-VuEPYj

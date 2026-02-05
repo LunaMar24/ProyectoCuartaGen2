@@ -10,6 +10,7 @@
     "dev:web": "npm --workspace @proyectocuartagen2/webveterinaria run dev -- --port 3002",
     "dev:mobile": "npm --workspace @proyectocuartagen2/mobileveterinaria exec npx expo start",
     "dev:mobile-limpia": "npm --workspace @proyectocuartagen2/mobileveterinaria exec npx expo start -c",
-    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:web\""
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "prod:api": "npm --workspace @proyectocuartagen2/apiveterinaria start"
   }
 }
