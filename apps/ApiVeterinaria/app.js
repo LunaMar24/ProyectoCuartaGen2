@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Middleware para CORS
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ['https://tu-dominio.com'] // Cambiar por tu dominio en producción
+        ? [`${process.env.API_DOMAIN}`] // Cambiar por tu dominio en producción
         : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -249,10 +249,10 @@ const initializeApp = async () => {
         // Iniciar servidor
         const server = app.listen(PORT, () => {
             console.log('🚀 Servidor iniciado correctamente');
-            console.log(`🌐 URL: http://localhost:${PORT}`);
-            console.log(`📋 API Base: http://localhost:${PORT}${API_PREFIX}`);
-            console.log(`📖 Documentación: http://localhost:${PORT}/docs`);
-            console.log(`💚 Health Check: http://localhost:${PORT}/health`);
+            console.log(`🌐 URL: ${API_DOMAIN}:${PORT}`);
+            console.log(`📋 API Base: ${API_DOMAIN}${API_PREFIX}`);
+            console.log(`📖 Documentación: ${API_DOMAIN}/docs`);
+            console.log(`💚 Health Check: ${API_DOMAIN}/health`);
             console.log(`🔧 Entorno: ${process.env.NODE_ENV || 'development'}`);
         });
 
