@@ -26,6 +26,7 @@ const app = express();
 // Configuración del puerto
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || '/api/v1';
+const API_DOMAIN = process.env.API_DOMAIN || 'http://localhost:3000';
 
 /**
  * CONFIGURACIÓN DE MIDDLEWARES
@@ -38,7 +39,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Middleware para CORS
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? [`${process.env.API_DOMAIN}`] // Cambiar por tu dominio en producción
+        ? [`${API_DOMAIN}`] // Cambiar por tu dominio en producción
         : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://127.0.0.1:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
