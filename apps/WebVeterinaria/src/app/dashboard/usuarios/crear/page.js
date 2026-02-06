@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function CrearUsuarioPage() {
   const router = useRouter();
@@ -67,7 +66,7 @@ export default function CrearUsuarioPage() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
+      const res = await fetch(apiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

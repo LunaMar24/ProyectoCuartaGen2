@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { API_BASE } from "@/lib/api";
 const API_H = `${API_BASE}/historiales`;
 
 export default function HistorialesPage() {

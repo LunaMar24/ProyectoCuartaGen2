@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function CrearHistorialPage() {
   const router = useRouter();
@@ -60,7 +59,7 @@ export default function CrearHistorialPage() {
     try {
       // Siempre extraer el ID para enviar y para redirigir
   const idToSend = mascotaLocked ? extractMascotaId(initialMascota) : extractMascotaId(form.mascota);
-      const res = await fetch(`${API_BASE}/historiales`, {
+      const res = await fetch(apiUrl("/historiales"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({

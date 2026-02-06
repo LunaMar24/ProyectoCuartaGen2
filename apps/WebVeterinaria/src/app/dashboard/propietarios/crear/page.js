@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function CrearPropietarioPage() {
   const router = useRouter();
@@ -41,7 +40,7 @@ export default function CrearPropietarioPage() {
 
     const token = localStorage.getItem("authToken");
     try {
-      const res = await fetch(`${API_BASE}/propietarios`, {
+      const res = await fetch(apiUrl("/propietarios"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),

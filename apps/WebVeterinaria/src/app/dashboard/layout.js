@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { apiUrl } from "@/lib/api";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function DashboardLayout({ children }) {
     // Limpia credenciales locales
     localStorage.removeItem("authToken");
     // Llama al endpoint de logout si existe (ignora errores)
-    fetch("http://localhost:3000/api/v1/auth/logout", {
+    fetch(apiUrl("/auth/logout"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export default function DashboardLayout({ children }) {
     }
 
     // Intentar obtener perfil para mostrar nombre/rol
-    fetch("http://localhost:3000/api/v1/auth/profile", {
+    fetch(apiUrl("/auth/profile"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

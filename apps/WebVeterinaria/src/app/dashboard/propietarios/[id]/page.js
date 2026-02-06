@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function EditarPropietarioPage() {
   const router = useRouter();
@@ -21,7 +20,7 @@ export default function EditarPropietarioPage() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token || !id) { setError("Falta token o id"); setLoading(false); return; }
-    fetch(`${API_BASE}/propietarios/${id}`, {
+    fetch(apiUrl(`/propietarios/${id}`), {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
@@ -52,7 +51,7 @@ export default function EditarPropietarioPage() {
 
     const token = localStorage.getItem("authToken");
     try {
-      const res = await fetch(`${API_BASE}/propietarios/${id}`, {
+      const res = await fetch(apiUrl(`/propietarios/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
