@@ -2,10 +2,10 @@
  * Configuración de conexión a la base de datos MySQL
  * @description Este módulo maneja la conexión a MySQL usando mysql2 con promesas
  */
-import { SocksClient } from 'socks';
 
 const mysql = require('mysql2/promise');
 //require('dotenv').config();
+const { SocksClient } = require('socks');
 
 /**
  * Configuración de la conexión a la base de datos
