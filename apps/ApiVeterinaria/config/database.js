@@ -4,39 +4,20 @@
  */
 
 const mysql = require('mysql2/promise');
-//require('dotenv').config();
-const { SocksClient } = require('socks');
+require('dotenv').config();
 
 /**
  * Configuración de la conexión a la base de datos
  * @type {Object}
  */
 const dbConfig = {
-    //host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_NAME || 'usuarios_db',
-    /*   ssl: {
-      rejectUnauthorized: false
-      }, */
-    stream: async () => {
-        const info = await SocksClient.createConnection({
-            proxy: {
-                host: process.env.PROXY_HOST,
-                port: Number(process.env.PROXY_PORT),
-                type: 5, // SOCKS5
-                userId: process.env.PROXY_USER,
-                password: process.env.PROXY_PASS,
-            },
-            command: 'connect',
-            destination: {
-                host: process.env.DB_HOST,
-                port: Number(process.env.DB_PORT || 3306)
-            },
-        });
-
-        return info.socket;
+    ssl: {
+    rejectUnauthorized: false
     },
     waitForConnections: true,
     connectionLimit: 10,

@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { API_BASE } from "@/lib/api";
 const API_H = `${API_BASE}/historiales`;
 
-export default function HistorialesPage() {
+function HistorialesPageContent() {
   const searchParams = useSearchParams();
   // Normalizar el parámetro ?mascota soportando valores como "(5) Luna Vi" o "5"
   const extractMascotaId = (val) => {
@@ -309,5 +308,13 @@ export default function HistorialesPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function HistorialesPage() {
+  return (
+    <Suspense fallback={<div className="text-slate-300 text-sm">Cargando...</div>}>
+      <HistorialesPageContent />
+    </Suspense>
   );
 }

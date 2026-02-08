@@ -3,6 +3,7 @@
 // Importamos hooks de React y el enrutador de Next.js (app router)
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiUrl } from "@/lib/api";
 
 // Componente principal de la pantalla de Login
 export default function Login() {
@@ -70,7 +71,7 @@ export default function Login() {
 
     console.log("Enviando solicitud de login con opciones:", options);
 
-    fetch("http://localhost:3000/api/v1/auth/login", options)
+    fetch(apiUrl("/auth/login"), options)
       .then(response => response.json())
       .then(data => {
         if (data.success) {

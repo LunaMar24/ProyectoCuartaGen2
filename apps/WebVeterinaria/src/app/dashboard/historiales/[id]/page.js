@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function EditarHistorialPage() {
   const router = useRouter();
@@ -51,7 +50,7 @@ export default function EditarHistorialPage() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token || !id) { setError("Falta token o id"); setLoading(false); return; }
-    fetch(`${API_BASE}/historiales/${id}`, { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
+    fetch(apiUrl(`/historiales/${id}`), { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
         const h = data?.data || data;
@@ -68,7 +67,7 @@ export default function EditarHistorialPage() {
           if (mName) setMascotaDisplay(`${mId}`.trim());
           else {
             // obtener nombre de la mascota si no vino en la respuesta
-            fetch(`${API_BASE}/mascotas/${mId}`, { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
+            fetch(apiUrl(`/mascotas/${mId}`), { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } })
               .then((r2) => r2.json())
               .then((d2) => {
                 const m = d2?.data || d2; const name = m?.nombre ?? "";
@@ -93,7 +92,7 @@ export default function EditarHistorialPage() {
     try {
       // asegurar ID de mascota incluso si tenemos el valor formateado "(ID) Nombre"
       const idToSend = (mascotaId && Number(mascotaId)) || extractMascotaId(mascotaDisplay) || extractMascotaId(form.mascota);
-      const res = await fetch(`${API_BASE}/historiales/${id}`, {
+      const res = await fetch(apiUrl(`/historiales/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({

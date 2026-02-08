@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/api";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -17,7 +18,7 @@ export default function ProfilePage() {
       return;
     }
 
-    fetch("http://localhost:3000/api/v1/auth/profile", {
+    fetch(apiUrl("/auth/profile"), {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
@@ -63,7 +64,7 @@ export default function ProfilePage() {
 
     // PUT al mismo recurso /auth/profile para actualizar datos básicos
     try {
-      const res = await fetch("http://localhost:3000/api/v1/auth/profile", {
+      const res = await fetch(apiUrl("/auth/profile"), {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),

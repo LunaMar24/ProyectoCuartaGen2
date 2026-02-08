@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { API_BASE } from "@/lib/api";
 
 // Endpoints REST de usuarios:
-//  - GET    http://localhost:3000/api/v1/users              -> lista paginada
-//  - POST   http://localhost:3000/api/v1/users/search       -> búsqueda por campos
-//  - DELETE http://localhost:3000/api/v1/users/:id          -> eliminar usuario
-
-const API_BASE = "http://localhost:3000/api/v1";
+//  - GET    API_BASE + /users           -> lista paginada
+//  - POST   API_BASE + /users/search    -> búsqueda por campos
+//  - DELETE API_BASE + /users/:id       -> eliminar usuario
 const API_USERS = `${API_BASE}/users`;
 
 export default function UsuariosListPage() {
