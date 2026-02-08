@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function EditarMascotaPage() {
   const router = useRouter();
@@ -40,7 +39,7 @@ export default function EditarMascotaPage() {
   useEffect(() => {
   const token = localStorage.getItem("authToken");
   if (!token || !id) { setLoadError("Falta token o id"); setLoading(false); return; }
-    fetch(`${API_BASE}/mascotas/${id}`, {
+    fetch(apiUrl(`/mascotas/${id}`), {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     })
@@ -106,7 +105,7 @@ export default function EditarMascotaPage() {
     const token = localStorage.getItem("authToken");
     setOwnerLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/mascotas/propietarios/search`, {
+      const res = await fetch(apiUrl("/mascotas/propietarios/search"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         // Backend espera campo "propietario" (no "cedula")
@@ -137,7 +136,7 @@ export default function EditarMascotaPage() {
     const token = localStorage.getItem("authToken");
     setOwnerLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/mascotas/propietarios/search`, {
+      const res = await fetch(apiUrl("/mascotas/propietarios/search"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ propietario: q })

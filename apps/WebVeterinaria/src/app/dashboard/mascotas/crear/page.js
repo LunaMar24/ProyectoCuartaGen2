@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-
-const API_BASE = "http://localhost:3000/api/v1";
+import { apiUrl } from "@/lib/api";
 
 export default function CrearMascotaPage() {
   const router = useRouter();
@@ -43,7 +42,7 @@ export default function CrearMascotaPage() {
     const token = localStorage.getItem("authToken");
     setOwnerLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/mascotas/propietarios/search`, {
+      const res = await fetch(apiUrl("/mascotas/propietarios/search"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         // Backend espera campo "propietario" (no "cedula") para buscar por nombre o coincidencias pertinentes
@@ -85,7 +84,7 @@ export default function CrearMascotaPage() {
 
     const token = localStorage.getItem("authToken");
     try {
-      const res = await fetch(`${API_BASE}/mascotas`, {
+      const res = await fetch(apiUrl("/mascotas"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
   body: JSON.stringify({ ...form, propietario: Number(selectedOwner?.id) })

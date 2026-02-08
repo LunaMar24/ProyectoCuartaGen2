@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { apiUrl } from "@/lib/api";
 
-const API_BASE = "http://localhost:3000/api/v1";
-
-export default function CrearHistorialPage() {
+function CrearHistorialPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMascota = searchParams?.get("mascota") || "";
@@ -60,7 +59,7 @@ export default function CrearHistorialPage() {
     try {
       // Siempre extraer el ID para enviar y para redirigir
   const idToSend = mascotaLocked ? extractMascotaId(initialMascota) : extractMascotaId(form.mascota);
-      const res = await fetch(`${API_BASE}/historiales`, {
+      const res = await fetch(apiUrl("/historiales"), {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -154,5 +153,13 @@ export default function CrearHistorialPage() {
         </div>
       </form>
     </section>
+  );
+}
+
+export default function CrearHistorialPage() {
+  return (
+    <Suspense fallback={<div className="text-slate-300 text-sm">Cargando...</div>}>
+      <CrearHistorialPageContent />
+    </Suspense>
   );
 }

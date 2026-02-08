@@ -11,6 +11,13 @@
     "dev:mobile": "npm --workspace @proyectocuartagen2/mobileveterinaria exec npx expo start",
     "dev:mobile-limpia": "npm --workspace @proyectocuartagen2/mobileveterinaria exec npx expo start -c",
     "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
-    "prod:api": "npm --workspace @proyectocuartagen2/apiveterinaria start"
+    "prod:api": "npm --workspace @proyectocuartagen2/apiveterinaria start",
+    "prod:web": "npm --workspace @proyectocuartagen2/webveterinaria run build"
+  },
+  "dependencies": {
+    "mysql2": "^3.16.3",
+    "next": "15.5.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }

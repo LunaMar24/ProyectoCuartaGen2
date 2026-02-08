@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiUrl } from "@/lib/api";
 
 export default function Dashboard() {
     // Hook para guardar el perfil del usuario y posibles errores
@@ -19,7 +20,7 @@ export default function Dashboard() {
             return;
         }
 
-        const url = "http://localhost:3000/api/v1/auth/profile";
+        const url = apiUrl("/auth/profile");
         const options = {
             method: "GET",
             headers: {
@@ -52,7 +53,7 @@ export default function Dashboard() {
         localStorage.removeItem("userEmail");
 
         // 2️⃣ Llamar a tu endpoint de logout
-        fetch("http://localhost:3000/api/v1/auth/logout", {
+        fetch(apiUrl("/auth/logout"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
