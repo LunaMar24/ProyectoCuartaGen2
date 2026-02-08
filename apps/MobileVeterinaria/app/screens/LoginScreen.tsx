@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { apiUrl } from '../../constants/api';
 
 type LoginScreenProps = {
     onLogin: (token: string, user: any) => void;
@@ -21,7 +22,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://10.0.2.2:3000/api/v1/auth/login', {
+            const res = await fetch(apiUrl('/auth/login'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
