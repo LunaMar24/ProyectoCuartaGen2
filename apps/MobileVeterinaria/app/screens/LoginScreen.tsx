@@ -29,14 +29,21 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             });
             const data = await res.json();
             if (data?.success && data.data.token) {
+                const rawUser = data?.data?.user || {};
+                const tipoUsuario = rawUser.tipo_Usuario ?? rawUser.tipo_usuario ?? rawUser.tipoUsuario;
+                if (String(tipoUsuario || '').toUpperCase() !== 'C') {
+                    setError('Usuario no valido');
+                    return;
+                }
+                const { tipo_usuario, tipoUsuario: tipoUsuarioLegacy, ...restUser } = rawUser;
+                const normalizedUser = { ...restUser, tipo_Usuario: tipoUsuario };
                 await AsyncStorage.setItem('authToken', data.data.token);
-                setError('Credenciales correctas');
                 await AsyncStorage.setItem('authToken', data.data.token);
-                await AsyncStorage.setItem('authUser', JSON.stringify(data.data.user));
-                onLogin(data.data.token, data.data.user);
+                await AsyncStorage.setItem('authUser', JSON.stringify(normalizedUser));
+                onLogin(data.data.token, normalizedUser);
                 router.replace('/screens/UserDetailsScreen');
             } else {
-                setError(data?.message || 'Credenciales incorrectas');
+                setError('Usuario no valido');
             }
         } catch (e) {
             setError('Error de conexión');

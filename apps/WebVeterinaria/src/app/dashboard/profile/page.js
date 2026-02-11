@@ -11,6 +11,14 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ nombre: "", email: "", telefono: "" });
   const [fieldErrors, setFieldErrors] = useState({});
 
+  const formatTipoUsuario = (value) => {
+    if (!value) return "-";
+    const normalized = String(value).trim();
+    if (normalized.toUpperCase() === "A") return "Administrador";
+    if (normalized.toUpperCase() === "C") return "Cliente";
+    return normalized;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -109,6 +117,17 @@ export default function ProfilePage() {
         {profile && (
           <form onSubmit={onSubmit} className="space-y-3 text-sm">
             <div className="grid grid-cols-3 gap-3 items-center">
+              <label className="col-span-1 text-slate-300">Tipo:</label>
+              <div className="col-span-2">
+                <input
+                  value={formatTipoUsuario(profile?.tipo_Usuario)}
+                  readOnly
+                  disabled
+                  className="w-full bg-slate-900 border border-slate-700 rounded-md px-3 py-2 text-slate-300"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 items-center">
               <label className="col-span-1 text-slate-300">Nombre:</label>
               <div className="col-span-2">
                 <input
@@ -168,6 +187,7 @@ export default function ProfilePage() {
       <aside className="bg-white/5 border border-white/10 rounded-lg p-6 text-slate-100">
         <div className="w-24 h-24 rounded-full bg-slate-700 mx-auto mb-4 ring-2 ring-emerald-400/60" />
         <div className="space-y-2 text-sm">
+          <p><span className="text-slate-400">Tipo:</span> {formatTipoUsuario(profile?.tipo_Usuario)}</p>
           <p><span className="text-slate-400">Nombre:</span> {form.nombre || "-"}</p>
           <p><span className="text-slate-400">Email:</span> {form.email || "-"}</p>
           <p><span className="text-slate-400">Teléfono:</span> {form.telefono || "-"}</p>

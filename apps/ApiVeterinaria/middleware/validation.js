@@ -38,7 +38,14 @@ const validateUser = [
         .matches(/^[\+]?[0-9\-\(\)\s]{7,20}$/)
         .withMessage('Formato de teléfono inválido')
         .isLength({ min: 7, max: 20 })
-        .withMessage('El teléfono debe tener entre 7 y 20 caracteres')
+        .withMessage('El teléfono debe tener entre 7 y 20 caracteres'),
+
+    body('tipo_Usuario')
+        .trim()
+        .notEmpty()
+        .withMessage('El tipo de usuario es requerido')
+        .isIn(['A', 'C'])
+        .withMessage('El tipo de usuario debe ser A o C')
 ];
 
 /**
@@ -80,7 +87,14 @@ const validateRegister = [
         .isLength({ min: 8, max: 128 })
         .withMessage('La contraseña debe tener entre 8 y 128 caracteres')
         .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-        .withMessage('La contraseña debe contener al menos: 1 minúscula, 1 mayúscula, 1 número y 1 carácter especial')
+        .withMessage('La contraseña debe contener al menos: 1 minúscula, 1 mayúscula, 1 número y 1 carácter especial'),
+
+    body('tipo_Usuario')
+        .trim()
+        .notEmpty()
+        .withMessage('El tipo de usuario es requerido')
+        .isIn(['A', 'C'])
+        .withMessage('El tipo de usuario debe ser A o C')
 ];
 
 /**
@@ -130,6 +144,12 @@ const validateProfileUpdate = [
         .withMessage('Formato de teléfono inválido')
         .isLength({ min: 7, max: 20 })
         .withMessage('El teléfono debe tener entre 7 y 20 caracteres'),
+
+    body('tipo_Usuario')
+        .optional()
+        .trim()
+        .isIn(['A', 'C'])
+        .withMessage('El tipo de usuario debe ser A o C'),
 
     body('currentPassword')
         .optional()

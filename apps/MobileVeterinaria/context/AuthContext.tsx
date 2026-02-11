@@ -6,6 +6,7 @@ export type User = {
   telefono: string;
   fecha_creacion: string;
   fecha_actualizacion: string;
+  tipo_Usuario?: string;
 };
 
 type AuthContextType = {

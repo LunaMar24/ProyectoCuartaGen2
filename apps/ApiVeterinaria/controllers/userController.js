@@ -166,7 +166,8 @@ class UserController {
                 });
             }
 
-            const { nombre, email, telefono } = req.body;
+            const { nombre, email, telefono, tipo_Usuario } = req.body;
+            const normalizedTipo = (tipo_Usuario || 'C').toString().trim().toUpperCase();
 
             // Verificar si el email ya existe
             const existingUser = await User.findByEmail(email);
@@ -178,7 +179,7 @@ class UserController {
             }
 
             // Crear el usuario
-            const newUser = await User.create({ nombre, email, telefono });
+            const newUser = await User.create({ nombre, email, telefono, tipo_Usuario: normalizedTipo });
 
             res.status(201).json({
                 success: true,
@@ -214,7 +215,8 @@ class UserController {
             }
 
             const { id } = req.params;
-            const { nombre, email, telefono } = req.body;
+            const { nombre, email, telefono, tipo_Usuario } = req.body;
+            const normalizedTipo = tipo_Usuario ? tipo_Usuario.toString().trim().toUpperCase() : undefined;
 
             // Validar que el ID sea un número
             if (isNaN(id)) {
@@ -245,7 +247,7 @@ class UserController {
             }
 
             // Actualizar el usuario
-            const updatedUser = await User.update(id, { nombre, email, telefono });
+            const updatedUser = await User.update(id, { nombre, email, telefono, tipo_Usuario: normalizedTipo });
 
             res.status(200).json({
                 success: true,

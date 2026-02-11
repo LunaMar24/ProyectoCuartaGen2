@@ -30,7 +30,8 @@ class AuthController {
                 });
             }
 
-            const { nombre, email, telefono, password } = req.body;
+            const { nombre, email, telefono, password, tipo_Usuario } = req.body;
+            const normalizedTipo = (tipo_Usuario || 'C').toString().trim().toUpperCase();
 
             // Verificar si el email ya existe
             const existingUser = await User.findByEmail(email);
@@ -50,6 +51,7 @@ class AuthController {
                 nombre,
                 email,
                 telefono,
+                tipo_Usuario: normalizedTipo,
                 password: hashedPassword
             });
 
@@ -208,7 +210,8 @@ class AuthController {
             }
 
             const userId = req.user.userId;
-            const { nombre, email, telefono, currentPassword, newPassword } = req.body;
+            const { nombre, email, telefono, currentPassword, newPassword, tipo_Usuario } = req.body;
+            const normalizedTipo = tipo_Usuario ? tipo_Usuario.toString().trim().toUpperCase() : undefined;
 
             // Verificar si el usuario existe
             const existingUser = await User.findByEmailWithPassword(req.user.email);
@@ -220,6 +223,7 @@ class AuthController {
             }
 
             let updateData = { nombre, email, telefono };
+            if (normalizedTipo) updateData.tipo_Usuario = normalizedTipo;
 
             // Si se quiere cambiar la contraseña
             if (newPassword) {
