@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { apiUrl } from '../../constants/api';
 
 type LoginScreenProps = {
     onLogin: (token: string, user: any) => void;
@@ -21,21 +22,28 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://10.0.2.2:3000/api/v1/auth/login', {
+            const res = await fetch(apiUrl('/auth/login'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
             });
             const data = await res.json();
             if (data?.success && data.data.token) {
+                const rawUser = data?.data?.user || {};
+                const tipoUsuario = rawUser.tipo_Usuario ?? rawUser.tipo_usuario ?? rawUser.tipoUsuario;
+                if (String(tipoUsuario || '').toUpperCase() !== 'C') {
+                    setError('Usuario no valido');
+                    return;
+                }
+                const { tipo_usuario, tipoUsuario: tipoUsuarioLegacy, ...restUser } = rawUser;
+                const normalizedUser = { ...restUser, tipo_Usuario: tipoUsuario };
                 await AsyncStorage.setItem('authToken', data.data.token);
-                setError('Credenciales correctas');
                 await AsyncStorage.setItem('authToken', data.data.token);
-                await AsyncStorage.setItem('authUser', JSON.stringify(data.data.user));
-                onLogin(data.data.token, data.data.user);
+                await AsyncStorage.setItem('authUser', JSON.stringify(normalizedUser));
+                onLogin(data.data.token, normalizedUser);
                 router.replace('/screens/UserDetailsScreen');
             } else {
-                setError(data?.message || 'Credenciales incorrectas');
+                setError('Usuario no valido');
             }
         } catch (e) {
             setError('Error de conexión');

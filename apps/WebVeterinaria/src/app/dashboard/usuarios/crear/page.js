@@ -6,7 +6,7 @@ import { apiUrl } from "@/lib/api";
 
 export default function CrearUsuarioPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", password: "" });
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", password: "", tipo_Usuario: "C" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
@@ -41,6 +41,11 @@ export default function CrearUsuarioPage() {
     if (!values.password || values.password.length < 8) {
       fe.password = ["La contraseña debe tener al menos 8 caracteres."];
       el.push("La contraseña debe tener al menos 8 caracteres.");
+    }
+
+    if (!values.tipo_Usuario || !["A", "C"].includes(values.tipo_Usuario)) {
+      fe.tipo_Usuario = ["El tipo de usuario es requerido."];
+      el.push("El tipo de usuario es requerido.");
     }
 
     return { ok: Object.keys(fe).length === 0, fe, el };
@@ -173,6 +178,23 @@ export default function CrearUsuarioPage() {
           />
           {fieldErrors.password && (
             <p className="mt-1 text-xs text-rose-300">{fieldErrors.password[0]}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm text-slate-300 mb-1">Tipo de usuario</label>
+          <select
+            name="tipo_Usuario"
+            value={form.tipo_Usuario}
+            onChange={onChange}
+            required
+            aria-invalid={fieldErrors.tipo_Usuario ? "true" : "false"}
+            className={`w-full bg-slate-800 border rounded-md px-3 py-2 ${fieldErrors.tipo_Usuario ? "border-red-500" : "border-slate-700"}`}
+          >
+            <option value="A">Administrador</option>
+            <option value="C">Cliente</option>
+          </select>
+          {fieldErrors.tipo_Usuario && (
+            <p className="mt-1 text-xs text-rose-300">{fieldErrors.tipo_Usuario[0]}</p>
           )}
         </div>
 
