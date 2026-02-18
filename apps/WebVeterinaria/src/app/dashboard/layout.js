@@ -63,7 +63,12 @@ export default function DashboardLayout({ children }) {
       .then((r) => r.json())
       .then((data) => {
         if (data?.success && data?.data) {
-          const { nombre, email } = data.data;
+          const { nombre, email, tipo_Usuario } = data.data;
+          if (String(tipo_Usuario || "").toUpperCase() === "C") {
+            localStorage.removeItem("authToken");
+            router.push("/");
+            return;
+          }
           setUser({ nombre: nombre || "Usuario", email: email || user.email });
         }
       })

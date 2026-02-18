@@ -44,6 +44,14 @@ export default function UsuariosListPage() {
     return { page: current, limit: per, totalPages, total };
   };
 
+  const formatTipoUsuario = (value) => {
+    if (!value) return "-";
+    const normalized = String(value).trim();
+    if (normalized.toUpperCase() === "A") return "Administrador";
+    if (normalized.toUpperCase() === "C") return "Cliente";
+    return normalized;
+  };
+
   const fetchPage = (pg = 1, lm = limit, f = filters) => {
     const tk = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     if (!tk) { setError("No hay token de autenticación"); setLoading(false); return; }
@@ -157,25 +165,37 @@ export default function UsuariosListPage() {
               <th className="text-left px-4 py-2">Nombre</th>
               <th className="text-left px-4 py-2">Email</th>
               <th className="text-left px-4 py-2">Teléfono</th>
+              <th className="text-left px-4 py-2">Tipo</th>
               <th className="text-left px-4 py-2">Creación</th>
               <th className="px-4 py-2 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {loading && (<tr><td className="px-4 py-3 text-slate-300" colSpan={5}>Cargando...</td></tr>)}
-            {!loading && error && (<tr><td className="px-4 py-3 text-rose-300" colSpan={5}>{error}</td></tr>)}
-            {!loading && !error && items.length === 0 && (<tr><td className="px-4 py-3 text-slate-300" colSpan={5}>Sin usuarios</td></tr>)}
+            {loading && (<tr><td className="px-4 py-3 text-slate-300" colSpan={6}>Cargando...</td></tr>)}
+            {!loading && error && (<tr><td className="px-4 py-3 text-rose-300" colSpan={6}>{error}</td></tr>)}
+            {!loading && !error && items.length === 0 && (<tr><td className="px-4 py-3 text-slate-300" colSpan={6}>Sin usuarios</td></tr>)}
             {!loading && !error && items.map((u) => {
               const id = u.id ?? u._id;
               const created = u.fecha_creacion || u.createdAt || u.fechaCreacion;
+              const tipo = u.tipo_Usuario;
               return (
                 <tr key={id} className="border-t border-white/10">
                   <td className="px-4 py-2">{u.nombre || u.name || "-"}</td>
                   <td className="px-4 py-2">{u.email || "-"}</td>
                   <td className="px-4 py-2">{u.telefono || u.phone || "-"}</td>
+                  <td className="px-4 py-2">{formatTipoUsuario(tipo)}</td>
                   <td className="px-4 py-2">{created ? new Date(created).toLocaleString() : "-"}</td>
                   <td className="px-4 py-2">
                     <div className="flex justify-end gap-2">
+                      <Link
+                        title="Editar"
+                        href={`/dashboard/usuarios/${id}`}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-700/60 text-sky-400 hover:text-sky-300"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.1 2.1 0 0 1 2.97 2.97L7.125 19.165 3 20l.835-4.125 13.027-12.388z" />
+                        </svg>
+                      </Link>
                       <button title="Eliminar" onClick={() => handleDelete(id)}
                               className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-700/60 text-rose-400 hover:text-rose-300">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">

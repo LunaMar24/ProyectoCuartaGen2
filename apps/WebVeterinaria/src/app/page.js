@@ -75,6 +75,12 @@ export default function Login() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          const rawUser = data?.data?.user || {};
+          const tipoUsuario = rawUser.tipo_Usuario ?? rawUser.tipo_usuario ?? rawUser.tipoUsuario;
+          if (String(tipoUsuario || "").toUpperCase() === "C") {
+            setErrors((prev) => ({ ...prev, general: "Usuario no valido" }));
+            return;
+          }
           // Si el usuario marcó "Recordarme", guardamos un indicador en localStorage
           if (rememberMe) {
             // Guardamos el email como ejemplo; en producción guarda tokens seguros
@@ -87,12 +93,12 @@ export default function Login() {
           router.push("/dashboard");
         } else {
           // Si las credenciales no coinciden, mostramos error general
-          setErrors((prev) => ({ ...prev, general: "Credenciales inválidas. Verifica e inténtalo de nuevo." }));
+          setErrors((prev) => ({ ...prev, general: "Usuario no valido" }));
         }
       })
       .catch(error => {
         console.error("Error en la solicitud de login:", error);
-        setErrors((prev) => ({ ...prev, general: "Ocurrió un error. Por favor intenta más tarde." }))
+        setErrors((prev) => ({ ...prev, general: "Usuario no valido" }))
       });
   }
   return (
