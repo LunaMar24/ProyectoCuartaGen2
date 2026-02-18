@@ -4,6 +4,7 @@
  */
 
 const Propietario = require('../models/Propietario');
+const User = require('../models/User');
 const { validationResult } = require('express-validator');
 
 class PropietarioController {
@@ -25,7 +26,7 @@ class PropietarioController {
             
             // Extraer campos específicos de búsqueda del body (solo para POST)
             const searchFields = {};
-            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo'];
+            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo', 'usuarioId'];
             
             // Solo revisar el body para campos específicos si es POST
             if (req.method === 'POST' && req.body) {
@@ -137,9 +138,25 @@ class PropietarioController {
                 });
             }
 
-            const { nombre, apellidos, cedula, telefono, correo } = req.body;
+            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = req.body;
 
-            const newProp = await Propietario.create({ nombre, apellidos, cedula, telefono, correo });
+            const usuario = await User.findById(usuarioId);
+            if (!usuario) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado'
+                });
+            }
+
+            const existingProp = await Propietario.findByUsuarioId(usuarioId);
+            if (existingProp) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'El usuario ya tiene un propietario asignado'
+                });
+            }
+
+            const newProp = await Propietario.create({ nombre, apellidos, cedula, telefono, correo, usuarioId });
 
             res.status(201).json({
                 success: true,
@@ -168,7 +185,7 @@ class PropietarioController {
             }
 
             const { id } = req.params;
-            const { nombre, apellidos, cedula, telefono, correo } = req.body;
+            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = req.body;
 
             if (isNaN(id)) {
                 return res.status(400).json({
@@ -185,7 +202,37 @@ class PropietarioController {
                 });
             }
 
-            const updated = await Propietario.update(id, { nombre, apellidos, cedula, telefono, correo });
+            let nextUsuarioId = usuarioId ?? existing.usuarioId;
+            let nextCorreo = correo;
+
+            const usuarioIdChanged = usuarioId !== undefined && usuarioId !== null && parseInt(usuarioId) !== existing.usuarioId;
+
+            if (usuarioIdChanged) {
+                const usuario = await User.findById(nextUsuarioId);
+                if (!usuario) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Usuario no encontrado'
+                    });
+                }
+
+                const propByUser = await Propietario.findByUsuarioId(nextUsuarioId);
+                if (propByUser && propByUser.id !== parseInt(id)) {
+                    return res.status(409).json({
+                        success: false,
+                        message: 'El usuario ya tiene un propietario asignado'
+                    });
+                }
+
+                nextCorreo = usuario.email;
+            }
+
+            const updated = await Propietario.update(id, { nombre, apellidos, cedula, telefono, correo: nextCorreo, usuarioId: nextUsuarioId });
+
+            const correoChanged = nextCorreo !== existing.correo;
+            if (usuarioIdChanged || correoChanged) {
+                await User.syncCorreo(nextUsuarioId, nextCorreo);
+            }
 
             res.status(200).json({
                 success: true,

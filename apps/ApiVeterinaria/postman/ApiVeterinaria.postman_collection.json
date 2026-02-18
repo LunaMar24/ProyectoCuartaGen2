@@ -95,7 +95,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+5411123\",\n  \"correo\": \"gmail.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+5411123\",\n  \"correo\": \"gmail.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios/search", "host": ["{{baseUrl}}"], "path": ["propietarios","search"] }
           }
@@ -124,7 +124,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios", "host": ["{{baseUrl}}"], "path": ["propietarios"] }
           }
@@ -136,7 +136,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos Alberto\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Carlos Alberto\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios/1", "host": ["{{baseUrl}}"], "path": ["propietarios","1"] }
           }

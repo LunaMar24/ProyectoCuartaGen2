@@ -1,0 +1,353 @@
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+--
+-- Host: dbvetecell-ucem-do-user-33004845-0.d.db.ondigitalocean.com    Database: veterinaria_bd
+-- ------------------------------------------------------
+-- Server version	8.0.45
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'fcd539be-0305-11f1-8112-22af5405e8c7:1-100';
+
+--
+-- Table structure for table `historial_medico`
+--
+
+DROP TABLE IF EXISTS `historial_medico`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `historial_medico` (
+  `idHistorial` int NOT NULL AUTO_INCREMENT,
+  `Mascota` int NOT NULL,
+  `FechaAtencion` datetime NOT NULL,
+  `Motivo` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Diagnostico` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`idHistorial`),
+  KEY `fk_Historial_Medico_Mascota1_idx` (`Mascota`),
+  CONSTRAINT `fk_Historial_Medico_Mascota1` FOREIGN KEY (`Mascota`) REFERENCES `mascota` (`idMascota`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `historial_medico`
+--
+
+LOCK TABLES `historial_medico` WRITE;
+/*!40000 ALTER TABLE `historial_medico` DISABLE KEYS */;
+INSERT INTO `historial_medico` VALUES (2,5,'2025-11-03 01:08:00','Dolor de panza','Gastroenteritis aguda'),(3,5,'2025-11-04 02:03:00','corte de uñas','arreglo por picos en uñas'),(7,4,'2025-11-03 14:21:00','atropello','patita quebrada'),(8,5,'2025-11-03 14:57:00','desparacitacion','se desparacito por presentar pequeños vomitos');
+/*!40000 ALTER TABLE `historial_medico` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `mascota`
+--
+
+DROP TABLE IF EXISTS `mascota`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `mascota` (
+  `idMascota` int NOT NULL AUTO_INCREMENT,
+  `Propietario` int NOT NULL,
+  `Nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Especie` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Raza` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Edad` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`idMascota`),
+  UNIQUE KEY `uq_mascota_propietario_nombre` (`Propietario`,`Nombre`),
+  KEY `fk_Mascota_Propietario_idx` (`Propietario`),
+  CONSTRAINT `fk_Mascota_Propietario` FOREIGN KEY (`Propietario`) REFERENCES `propietario` (`idPropietario`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `mascota`
+--
+
+LOCK TABLES `mascota` WRITE;
+/*!40000 ALTER TABLE `mascota` DISABLE KEYS */;
+INSERT INTO `mascota` VALUES (4,2,'Muñeca','Perro','French Puddle','9 años'),(5,2,'LunaVivi','Perro','pastor','3 años'),(11,11,'LunaVal','perro','chiguagua','7 años');
+/*!40000 ALTER TABLE `mascota` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `propietario`
+--
+
+DROP TABLE IF EXISTS `propietario`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `propietario` (
+  `idPropietario` int NOT NULL AUTO_INCREMENT,
+  `Nombre` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Apellidos` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Cedula` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Correo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `usuarioId` int NOT NULL,
+  PRIMARY KEY (`idPropietario`),
+  UNIQUE KEY `uq_propietario_usuarioId` (`usuarioId`),
+  CONSTRAINT `fk_propietario_usuario` FOREIGN KEY (`usuarioId`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `propietario`
+--
+
+LOCK TABLES `propietario` WRITE;
+/*!40000 ALTER TABLE `propietario` DISABLE KEYS */;
+INSERT INTO `propietario` VALUES (2,'Marcela','Jiménez','6-0291-0060','83641655','marcelamja@gmail.com',2),(11,'Valeria','Campos Mora','0101234569','85007890','valeria.campos@outlook.com',11);
+/*!40000 ALTER TABLE `propietario` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `usuarios`
+--
+
+DROP TABLE IF EXISTS `usuarios`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuarios` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre completo del usuario',
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Email único del usuario',
+  `telefono` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Número de teléfono del usuario',
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Contraseña hasheada del usuario',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de creación',
+  `fecha_actualizacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha y hora de última actualización',
+  `tipo_Usuario` varchar(1) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_email` (`email`),
+  KEY `idx_nombre` (`nombre`),
+  KEY `idx_fecha_creacion` (`fecha_creacion`),
+  KEY `idx_nombre_email` (`nombre`,`email`),
+  KEY `idx_fecha_actualizacion` (`fecha_actualizacion`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Tabla para almacenar información de usuarios';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `usuarios`
+--
+
+LOCK TABLES `usuarios` WRITE;
+/*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` VALUES (1,'Juan Pérez Gonzalez','juan.perez@ejemplo.com','+52 55 1234-5633','$2a$12$aLWq3PLK1wTIHXqvEQAdLOTLDD1tn3I36lvbGTpRqWklgliBXNjoC','2025-11-02 22:43:28','2026-02-13 00:26:23','A'),(2,'María García','maria.garcia@ejemplo.com','+52 55 2345-6789','$2a$12$aLWq3PLK1wTIHXqvEQAdLOTLDD1tn3I36lvbGTpRqWklgliBXNjoC','2025-11-02 22:43:28','2026-02-12 21:23:45','C'),(11,'Eladio Valverde','eladiovch@gmail.com','83641656','$2a$12$aLWq3PLK1wTIHXqvEQAdLOTLDD1tn3I36lvbGTpRqWklgliBXNjoC','2025-11-03 02:08:54','2026-02-18 04:09:00','C');
+/*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Temporary view structure for view `vhistorial_medico`
+--
+
+DROP TABLE IF EXISTS `vhistorial_medico`;
+/*!50001 DROP VIEW IF EXISTS `vhistorial_medico`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vhistorial_medico` AS SELECT 
+ 1 AS `idHistorial`,
+ 1 AS `Mascota`,
+ 1 AS `FechaAtencion`,
+ 1 AS `Motivo`,
+ 1 AS `Diagnostico`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vista_usuarios`
+--
+
+DROP TABLE IF EXISTS `vista_usuarios`;
+/*!50001 DROP VIEW IF EXISTS `vista_usuarios`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vista_usuarios` AS SELECT 
+ 1 AS `id`,
+ 1 AS `nombre`,
+ 1 AS `email`,
+ 1 AS `telefono`,
+ 1 AS `fecha_creacion_formato`,
+ 1 AS `fecha_actualizacion_formato`,
+ 1 AS `dias_desde_registro`,
+ 1 AS `tipo_usuario`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vmascota`
+--
+
+DROP TABLE IF EXISTS `vmascota`;
+/*!50001 DROP VIEW IF EXISTS `vmascota`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vmascota` AS SELECT 
+ 1 AS `idMascota`,
+ 1 AS `propietario`,
+ 1 AS `nombre`,
+ 1 AS `especie`,
+ 1 AS `raza`,
+ 1 AS `edad`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `vproietariosmascota`
+--
+
+DROP TABLE IF EXISTS `vproietariosmascota`;
+/*!50001 DROP VIEW IF EXISTS `vproietariosmascota`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vproietariosmascota` AS SELECT 
+ 1 AS `id`,
+ 1 AS `propietario`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping routines for database 'veterinaria_bd'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `sp_sincronizar_correo` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,ONLY_FULL_GROUP_BY,ANSI,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER="vete_adminuser"@"%" PROCEDURE "sp_sincronizar_correo"(
+    IN p_usuarioId INT,
+    IN p_nuevoCorreo VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existente INT DEFAULT 0;
+
+    START TRANSACTION;
+
+    -- Validar que el correo no esté registrado en otro usuario
+    SELECT COUNT(*) INTO v_existente
+    FROM usuarios
+    WHERE email = p_nuevoCorreo
+      AND id <> p_usuarioId;
+
+    IF v_existente > 0 THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El correo ya está registrado en otro usuario';
+    END IF;
+
+    -- Actualizar usuario
+    UPDATE usuarios
+    SET email = p_nuevoCorreo
+    WHERE id = p_usuarioId;
+
+    -- Actualizar propietario asociado
+    UPDATE propietario
+    SET Correo = p_nuevoCorreo
+    WHERE usuarioId = p_usuarioId;
+
+    COMMIT;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Final view structure for view `vhistorial_medico`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vhistorial_medico`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`vete_adminuser`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vhistorial_medico` AS select `hm`.`idHistorial` AS `idHistorial`,concat('(',`m`.`idMascota`,') ',`m`.`Nombre`) AS `Mascota`,`hm`.`FechaAtencion` AS `FechaAtencion`,`hm`.`Motivo` AS `Motivo`,`hm`.`Diagnostico` AS `Diagnostico` from (`historial_medico` `hm` join `mascota` `m` on((`hm`.`Mascota` = `m`.`idMascota`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_usuarios`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_usuarios`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`vete_adminuser`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_usuarios` AS select `usuarios`.`id` AS `id`,`usuarios`.`nombre` AS `nombre`,`usuarios`.`email` AS `email`,`usuarios`.`telefono` AS `telefono`,date_format(`usuarios`.`fecha_creacion`,'%d/%m/%Y %H:%i') AS `fecha_creacion_formato`,date_format(`usuarios`.`fecha_actualizacion`,'%d/%m/%Y %H:%i') AS `fecha_actualizacion_formato`,(to_days(now()) - to_days(`usuarios`.`fecha_creacion`)) AS `dias_desde_registro`,(case `usuarios`.`tipo_Usuario` when 'A' then 'Administrador' when 'C' then 'Cliente' end) AS `tipo_usuario` from `usuarios` order by `usuarios`.`fecha_creacion` desc */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vmascota`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vmascota`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`vete_adminuser`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vmascota` AS select `m`.`idMascota` AS `idMascota`,concat(`p`.`Nombre`,' ',`p`.`Apellidos`,' (',`p`.`Cedula`,')') AS `propietario`,`m`.`Nombre` AS `nombre`,`m`.`Especie` AS `especie`,`m`.`Raza` AS `raza`,`m`.`Edad` AS `edad` from (`mascota` `m` join `propietario` `p` on((`m`.`Propietario` = `p`.`idPropietario`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vproietariosmascota`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vproietariosmascota`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`vete_adminuser`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `vproietariosmascota` AS select `p`.`idPropietario` AS `id`,concat(`p`.`Nombre`,' ',`p`.`Apellidos`,' (',`p`.`Cedula`,')') AS `propietario` from `propietario` `p` group by `p`.`idPropietario`,`p`.`Nombre`,`p`.`Apellidos`,`p`.`Cedula` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-02-18  0:21:06

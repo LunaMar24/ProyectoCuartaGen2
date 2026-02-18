@@ -185,6 +185,21 @@ class User {
     }
 
     /**
+     * Sincroniza el correo entre usuario y propietario usando el SP
+     * @param {number} usuarioId - ID del usuario
+     * @param {string} nuevoCorreo - Nuevo correo a sincronizar
+     * @returns {Promise<void>}
+     */
+    static async syncCorreo(usuarioId, nuevoCorreo) {
+        try {
+            await pool.execute('CALL sp_sincronizar_correo(?, ?)', [usuarioId, nuevoCorreo]);
+        } catch (error) {
+            console.error('Error en User.syncCorreo:', error);
+            throw new Error('Error al sincronizar correo');
+        }
+    }
+
+    /**
      * Busca un usuario por email para autenticación (incluye password)
      * @param {string} email - Email del usuario
      * @returns {Promise<Object|null>} Usuario encontrado con password o null

@@ -24,6 +24,7 @@ class Propietario {
      * @param {string} propData.cedula - Cédula
      * @param {string} propData.telefono - Teléfono
      * @param {string} propData.correo - Correo electrónico
+     * @param {number} propData.usuarioId - ID del usuario relacionado
      */
     constructor(propData) {
         this.id = propData.id;
@@ -32,6 +33,7 @@ class Propietario {
         this.cedula = propData.cedula;
         this.telefono = propData.telefono;
         this.correo = propData.correo;
+            this.usuarioId = propData.usuarioId;
     }
 
     /**
@@ -41,7 +43,7 @@ class Propietario {
     static async findAll() {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario ORDER BY Nombre'
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario ORDER BY Nombre'
             );
             return rows;
         } catch (error) {
@@ -58,13 +60,31 @@ class Propietario {
     static async findById(id) {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario WHERE idPropietario = ?',
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE idPropietario = ?',
                 [id]
             );
             return rows.length > 0 ? rows[0] : null;
         } catch (error) {
             console.error('Error en Propietario.findById:', error);
             throw new Error('Error al buscar propietario por ID');
+        }
+    }
+
+    /**
+     * Busca un propietario por su usuarioId
+     * @param {number} usuarioId - ID del usuario asociado
+     * @returns {Promise<Object|null>} Propietario encontrado o null
+     */
+    static async findByUsuarioId(usuarioId) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE usuarioId = ?',
+                [usuarioId]
+            );
+            return rows.length > 0 ? rows[0] : null;
+        } catch (error) {
+            console.error('Error en Propietario.findByUsuarioId:', error);
+            throw new Error('Error al buscar propietario por usuarioId');
         }
     }
 
@@ -80,10 +100,10 @@ class Propietario {
      */
     static async create(propData) {
         try {
-            const { nombre, apellidos, cedula, telefono, correo } = propData;
+            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = propData;
             const [result] = await pool.execute(
-                'INSERT INTO propietario (Nombre, Apellidos, Cedula, Telefono, Correo) VALUES (?, ?, ?, ?, ?)',
-                [nombre, apellidos, cedula, telefono, correo]
+                'INSERT INTO propietario (Nombre, Apellidos, Cedula, Telefono, Correo, usuarioId) VALUES (?, ?, ?, ?, ?, ?)',
+                [nombre, apellidos, cedula, telefono, correo, usuarioId]
             );
 
             const newProp = await this.findById(result.insertId);
@@ -105,10 +125,10 @@ class Propietario {
      */
     static async update(id, propData) {
         try {
-            const { nombre, apellidos, cedula, telefono, correo } = propData;
+            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = propData;
 
-            let query = 'UPDATE propietario SET Nombre = ?, Apellidos = ?, Cedula = ?, Telefono = ?, Correo = ? WHERE idPropietario = ?';
-            const params = [nombre, apellidos, cedula, telefono, correo, id];
+            let query = 'UPDATE propietario SET Nombre = ?, Apellidos = ?, Cedula = ?, Telefono = ?, Correo = ?, usuarioId = ? WHERE idPropietario = ?';
+            const params = [nombre, apellidos, cedula, telefono, correo, usuarioId, id];
 
             const [result] = await pool.execute(query, params);
 
@@ -153,7 +173,7 @@ class Propietario {
     static async searchByName(nombre) {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario WHERE Nombre LIKE ? OR Apellidos LIKE ? ORDER BY Nombre',
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE Nombre LIKE ? OR Apellidos LIKE ? ORDER BY Nombre',
                 [`%${nombre}%`, `%${nombre}%`]
             );
             return rows;
@@ -170,18 +190,19 @@ class Propietario {
      */
     static async searchByFields(searchFields) {
         try {
-            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo'];
+            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo', 'usuarioId'];
             const fieldMappings = {
                 'nombre': 'Nombre',
                 'apellidos': 'Apellidos', 
                 'cedula': 'Cedula',
                 'telefono': 'Telefono',
-                'correo': 'Correo'
+                'correo': 'Correo',
+                'usuarioId': 'usuarioId'
             };
 
             // Campos de texto (búsqueda parcial) vs campos exactos
             const textFields = ['nombre', 'apellidos', 'correo', 'cedula', 'telefono'];
-            const exactFields = [];
+            const exactFields = ['usuarioId'];
 
             const conditions = [];
             const params = [];
@@ -210,7 +231,7 @@ class Propietario {
             const whereClause = conditions.join(' AND ');
             const query = `
                 SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, 
-                       Cedula as cedula, Telefono as telefono, Correo as correo 
+                       Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId 
                 FROM propietario 
                 WHERE ${whereClause} 
                 ORDER BY Nombre, Apellidos
@@ -255,7 +276,7 @@ class Propietario {
             if (limitInt > 100) limitInt = 100;
 
             const [props] = await pool.execute(
-                `SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario ORDER BY Nombre LIMIT ${limitInt} OFFSET ${offset}`
+                `SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario ORDER BY Nombre LIMIT ${limitInt} OFFSET ${offset}`
             );
 
             const total = await this.count();

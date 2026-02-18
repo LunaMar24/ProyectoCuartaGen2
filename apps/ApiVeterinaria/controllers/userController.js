@@ -246,8 +246,14 @@ class UserController {
                 }
             }
 
+            const emailChanged = email && email !== existingUser.email;
+
             // Actualizar el usuario
             const updatedUser = await User.update(id, { nombre, email, telefono, tipo_Usuario: normalizedTipo });
+
+            if (emailChanged) {
+                await User.syncCorreo(id, email);
+            }
 
             res.status(200).json({
                 success: true,
