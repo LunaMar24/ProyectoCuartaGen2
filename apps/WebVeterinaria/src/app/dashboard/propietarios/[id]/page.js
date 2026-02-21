@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, getApiErrorMessage } from "@/lib/api";
 
 export default function EditarPropietarioPage() {
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function EditarPropietarioPage() {
         setOk("Propietario actualizado correctamente");
         setTimeout(() => router.push("/dashboard/propietarios"), 800);
       } else {
-        setError(data?.message || "No se pudo actualizar el propietario");
+        setError(getApiErrorMessage(data, "No se pudo actualizar el propietario"));
         const arr = Array.isArray(data?.errors) ? data.errors : [];
         if (arr.length) {
           const byField = {};

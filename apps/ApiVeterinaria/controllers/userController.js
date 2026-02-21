@@ -166,8 +166,8 @@ class UserController {
                 });
             }
 
-            const { nombre, email, telefono, tipo_Usuario } = req.body;
-            const normalizedTipo = (tipo_Usuario || 'C').toString().trim().toUpperCase();
+            const { nombre, email, telefono } = req.body;
+            const normalizedTipo = 'A';
 
             // Verificar si el email ya existe
             const existingUser = await User.findByEmail(email);
@@ -188,10 +188,11 @@ class UserController {
             });
         } catch (error) {
             console.error('Error en createUser:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
@@ -215,8 +216,8 @@ class UserController {
             }
 
             const { id } = req.params;
-            const { nombre, email, telefono, tipo_Usuario } = req.body;
-            const normalizedTipo = tipo_Usuario ? tipo_Usuario.toString().trim().toUpperCase() : undefined;
+            const { nombre, email, telefono } = req.body;
+            const normalizedTipo = 'A';
 
             // Validar que el ID sea un número
             if (isNaN(id)) {
@@ -232,6 +233,14 @@ class UserController {
                 return res.status(404).json({
                     success: false,
                     message: 'Usuario no encontrado'
+                });
+            }
+
+            if ((existingUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
+                return res.status(409).json({
+                    success: false,
+                    message: 'No se puede eliminar un usuario cliente desde mantenimiento de usuarios. Debe eliminarlo desde mantenimiento de propietarios.',
+                    code: 'CLIENT_USER_DELETE_BLOCKED'
                 });
             }
 
@@ -262,10 +271,11 @@ class UserController {
             });
         } catch (error) {
             console.error('Error en updateUser:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
@@ -297,6 +307,14 @@ class UserController {
                 });
             }
 
+            if ((existingUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
+                return res.status(409).json({
+                    success: false,
+                    message: 'No se puede eliminar un usuario cliente desde mantenimiento de usuarios. Debe eliminarlo desde mantenimiento de propietarios.',
+                    code: 'CLIENT_USER_DELETE_BLOCKED'
+                });
+            }
+
             // Eliminar el usuario
             await User.delete(id);
 
@@ -306,10 +324,11 @@ class UserController {
             });
         } catch (error) {
             console.error('Error en deleteUser:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }

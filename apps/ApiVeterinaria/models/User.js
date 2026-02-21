@@ -10,6 +10,47 @@ const { pool } = require('../config/database');
  */
 class User {
     /**
+     * Crea un error de aplicación con metadatos HTTP
+     * @param {string} message - Mensaje de error
+     * @param {number} status - Código HTTP sugerido
+     * @param {string} code - Código interno de error
+     * @returns {Error}
+     */
+    static buildAppError(message, status, code) {
+        const appError = new Error(message);
+        appError.status = status;
+        appError.code = code;
+        return appError;
+    }
+
+    /**
+     * Mapea errores SIGNAL (SQLSTATE 45000) de SP a errores de aplicación
+     * @param {Object} error - Error original de mysql2
+     * @returns {Error|null}
+     */
+    static mapStoredProcedureError(error) {
+        const isSignalError = error && (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000');
+        if (!isSignalError) return null;
+
+        const signalMessage = (error.sqlMessage || error.message || '').trim();
+
+        const mappedErrors = {
+            'El correo ya está registrado en otro usuario': { status: 409, code: 'EMAIL_ALREADY_EXISTS_OTHER_USER' }
+        };
+
+        const mapped = mappedErrors[signalMessage];
+        if (mapped) {
+            return this.buildAppError(signalMessage, mapped.status, mapped.code);
+        }
+
+        return this.buildAppError(
+            signalMessage || 'Error de validación en procedimiento almacenado',
+            400,
+            'SP_VALIDATION_ERROR'
+        );
+    }
+
+    /**
      * Convierte una fecha (Date o string ISO) a formato MySQL DATETIME: 'YYYY-MM-DD HH:MM:SS'
      * @param {string|Date} dateInput
      * @returns {string}
@@ -129,9 +170,9 @@ class User {
         } catch (error) {
             console.error('Error en User.create:', error);
             if (error.code === 'ER_DUP_ENTRY') {
-                throw new Error('El email ya está registrado');
+                throw this.buildAppError('El email ya está registrado', 409, 'EMAIL_ALREADY_EXISTS');
             }
-            throw new Error('Error al crear usuario');
+            throw this.buildAppError('Error al crear usuario', 500, 'USER_CREATE_ERROR');
         }
     }
 
@@ -178,9 +219,9 @@ class User {
         } catch (error) {
             console.error('Error en User.update:', error);
             if (error.code === 'ER_DUP_ENTRY') {
-                throw new Error('El email ya está registrado');
+                throw this.buildAppError('El email ya está registrado', 409, 'EMAIL_ALREADY_EXISTS');
             }
-            throw new Error('Error al actualizar usuario');
+            throw this.buildAppError('Error al actualizar usuario', 500, 'USER_UPDATE_ERROR');
         }
     }
 
@@ -195,6 +236,10 @@ class User {
             await pool.execute('CALL sp_sincronizar_correo(?, ?)', [usuarioId, nuevoCorreo]);
         } catch (error) {
             console.error('Error en User.syncCorreo:', error);
+            const spError = this.mapStoredProcedureError(error);
+            if (spError) {
+                throw spError;
+            }
             throw new Error('Error al sincronizar correo');
         }
     }

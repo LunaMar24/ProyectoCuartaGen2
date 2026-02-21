@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getApiErrorMessage } from "@/lib/api";
 
 // Endpoints REST de usuarios:
 //  - GET    API_BASE + /users           -> lista paginada
@@ -100,7 +100,13 @@ export default function UsuariosListPage() {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` },
     })
       .then((r) => r.json().catch(() => ({})))
-      .then(() => { setItems((prev) => prev.filter((u) => String(u.id ?? u._id) !== String(id))); })
+      .then((data) => {
+        if (data?.success) {
+          setItems((prev) => prev.filter((u) => String(u.id ?? u._id) !== String(id)));
+          return;
+        }
+        alert(getApiErrorMessage(data, "No se pudo eliminar el usuario"));
+      })
       .catch(() => alert("No se pudo eliminar el usuario"));
   };
 

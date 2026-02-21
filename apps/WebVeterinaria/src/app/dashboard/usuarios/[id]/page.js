@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getApiErrorMessage } from "@/lib/api";
 
 const API_USERS = `${API_BASE}/users`;
 
@@ -20,7 +20,6 @@ export default function EditarUsuarioPage() {
     nombre: "",
     email: "",
     telefono: "",
-    tipo_Usuario: "C",
   });
 
   const validateForm = (values) => {
@@ -41,11 +40,6 @@ export default function EditarUsuarioPage() {
     if (values.telefono && !/^\+?[0-9\s\-()]{7,}$/.test(values.telefono)) {
       fe.telefono = ["El telefono contiene un formato invalido."];
       el.push("El telefono contiene un formato invalido.");
-    }
-
-    if (!values.tipo_Usuario || !["A", "C"].includes(values.tipo_Usuario)) {
-      fe.tipo_Usuario = ["El tipo de usuario es requerido."];
-      el.push("El tipo de usuario es requerido.");
     }
 
     return { ok: Object.keys(fe).length === 0, fe, el };
@@ -78,7 +72,6 @@ export default function EditarUsuarioPage() {
           nombre: user?.nombre ?? "",
           email: user?.email ?? "",
           telefono: user?.telefono ?? "",
-          tipo_Usuario: user?.tipo_Usuario ?? "C",
         });
       })
       .catch(() => setError("No se pudo obtener el usuario"))
@@ -114,15 +107,14 @@ export default function EditarUsuarioPage() {
       const res = await fetch(`${API_USERS}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, tipo_Usuario: "A" }),
       });
       const data = await res.json().catch(() => ({}));
       if (data?.success) {
         setOk("Usuario actualizado correctamente");
         setTimeout(() => router.push("/dashboard/usuarios"), 800);
       } else {
-        const serverMsg = data?.msg || data?.message;
-        setError(serverMsg ? `No se pudo actualizar el usuario: ${serverMsg}` : "No se pudo actualizar el usuario");
+        setError(getApiErrorMessage(data, "No se pudo actualizar el usuario"));
         const arr = Array.isArray(data?.errors) ? data.errors : [];
         if (arr.length) {
           setErrorList(arr.map((item) => item.msg || item.message || JSON.stringify(item)));
@@ -206,24 +198,6 @@ export default function EditarUsuarioPage() {
               <p className="mt-1 text-xs text-rose-300">{fieldErrors.telefono[0]}</p>
             )}
           </div>
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Tipo de usuario</label>
-            <select
-              name="tipo_Usuario"
-              value={form.tipo_Usuario}
-              onChange={onChange}
-              required
-              aria-invalid={fieldErrors.tipo_Usuario ? "true" : "false"}
-              className={`w-full bg-slate-800 border rounded-md px-3 py-2 ${fieldErrors.tipo_Usuario ? "border-red-500" : "border-slate-700"}`}
-            >
-              <option value="A">Administrador</option>
-              <option value="C">Cliente</option>
-            </select>
-            {fieldErrors.tipo_Usuario && (
-              <p className="mt-1 text-xs text-rose-300">{fieldErrors.tipo_Usuario[0]}</p>
-            )}
-          </div>
-
           <div className="pt-2 flex items-center gap-2">
             <button
               type="button"

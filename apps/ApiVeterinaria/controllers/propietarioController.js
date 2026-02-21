@@ -138,25 +138,8 @@ class PropietarioController {
                 });
             }
 
-            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = req.body;
-
-            const usuario = await User.findById(usuarioId);
-            if (!usuario) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Usuario no encontrado'
-                });
-            }
-
-            const existingProp = await Propietario.findByUsuarioId(usuarioId);
-            if (existingProp) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'El usuario ya tiene un propietario asignado'
-                });
-            }
-
-            const newProp = await Propietario.create({ nombre, apellidos, cedula, telefono, correo, usuarioId });
+            const { nombre, apellidos, cedula, telefono, correo } = req.body;
+            const newProp = await Propietario.create({ nombre, apellidos, cedula, telefono, correo });
 
             res.status(201).json({
                 success: true,
@@ -165,10 +148,11 @@ class PropietarioController {
             });
         } catch (error) {
             console.error('Error en createPropietario:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
@@ -241,10 +225,11 @@ class PropietarioController {
             });
         } catch (error) {
             console.error('Error en updatePropietario:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
@@ -276,10 +261,11 @@ class PropietarioController {
             });
         } catch (error) {
             console.error('Error en deletePropietario:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
