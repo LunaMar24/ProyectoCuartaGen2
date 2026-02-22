@@ -79,34 +79,32 @@ BEGIN
     DECLARE v_existe INT DEFAULT 0;
     DECLARE v_fecha_expiracion DATETIME;
 
-    -- Variables de horario laboral (ajustables en futuro)
     DECLARE v_hora_inicio TIME DEFAULT '09:00:00';
     DECLARE v_hora_fin TIME DEFAULT '17:00:00';
 
     -- Aislamiento fuerte
     SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
     START TRANSACTION;
 
     -- Limpiar reservas expiradas
     DELETE FROM cita_reservas
     WHERE fecha_expiracion <= NOW();
 
-    -- 1 Validar rango correcto
+    -- Validar rango correcto
     IF p_fecha_inicio >= p_fecha_fin THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Rango de fecha inválido';
     END IF;
 
-    -- 2 Validar que no cruce de día
+    -- Validar que no cruce de día
     IF DATE(p_fecha_inicio) <> DATE(p_fecha_fin) THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'No se permiten reservas que crucen de día';
     END IF;
 
-    -- 3 Validar horario laboral
+    -- Validar horario laboral
     IF TIME(p_fecha_inicio) < v_hora_inicio
        OR TIME(p_fecha_fin) > v_hora_fin THEN
         ROLLBACK;
@@ -114,35 +112,7 @@ BEGIN
         SET MESSAGE_TEXT = 'Fuera de horario laboral';
     END IF;
 
-    -- 4 Validar solapamiento contra citas activas (P, F)
-    SELECT COUNT(*) INTO v_existe
-    FROM citas
-    WHERE estado IN ('P','F')
-      AND fecha_inicio < p_fecha_fin
-      AND fecha_fin > p_fecha_inicio
-    FOR UPDATE;
-
-    IF v_existe > 0 THEN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ya existe una cita en ese rango';
-    END IF;
-
-    -- 5 Validar solapamiento contra reservas activas
-    SELECT COUNT(*) INTO v_existe
-    FROM cita_reservas
-    WHERE fecha_expiracion > NOW()
-      AND fecha_inicio < p_fecha_fin
-      AND fecha_fin > p_fecha_inicio
-    FOR UPDATE;
-
-    IF v_existe > 0 THEN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Ya existe una reserva activa en ese rango';
-    END IF;
-
-    -- 6 Validar que la mascota no tenga cita (P,F) ese mismo día
+    -- Validar que la mascota no tenga cita P o F ese día
     SELECT COUNT(*) INTO v_existe
     FROM citas
     WHERE estado IN ('P','F')
@@ -156,24 +126,43 @@ BEGIN
         SET MESSAGE_TEXT = 'La mascota ya tiene una cita ese día';
     END IF;
 
-    -- 7 Validar que la mascota no tenga reserva activa ese día
-    SELECT COUNT(*) INTO v_existe
-    FROM cita_reservas
+    -- Eliminar cualquier reserva activa previa de la mascota
+    DELETE FROM cita_reservas
     WHERE mascotaId = p_mascotaId
-      AND fecha_expiracion > NOW()
-      AND DATE(fecha_inicio) = DATE(p_fecha_inicio)
+      AND fecha_expiracion > NOW();
+
+    -- Validar solapamiento contra citas activas
+    SELECT COUNT(*) INTO v_existe
+    FROM citas
+    WHERE estado IN ('P','F')
+      AND fecha_inicio < p_fecha_fin
+      AND fecha_fin > p_fecha_inicio
     FOR UPDATE;
 
     IF v_existe > 0 THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'La mascota ya tiene una reserva activa ese día';
+        SET MESSAGE_TEXT = 'Ya existe una cita en ese rango';
     END IF;
 
-    -- 8 Calcular expiración
+    -- Validar solapamiento contra reservas activas
+    SELECT COUNT(*) INTO v_existe
+    FROM cita_reservas
+    WHERE fecha_expiracion > NOW()
+      AND fecha_inicio < p_fecha_fin
+      AND fecha_fin > p_fecha_inicio
+    FOR UPDATE;
+
+    IF v_existe > 0 THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ya existe una reserva activa en ese rango';
+    END IF;
+
+    -- Calcular expiración
     SET v_fecha_expiracion = DATE_ADD(NOW(), INTERVAL p_timeout_minutos MINUTE);
 
-    -- 9 Insertar reserva
+    -- Insertar reserva
     INSERT INTO cita_reservas (
         mascotaId,
         usuarioId,
@@ -191,7 +180,6 @@ BEGIN
 
     COMMIT;
 
-    -- Devolver idReserva
     SELECT LAST_INSERT_ID() AS idReserva;
 
 END$$

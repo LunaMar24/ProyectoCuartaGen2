@@ -6,6 +6,14 @@
 const { pool } = require('../config/database');
 
 class Cita {
+    static toMySQLDateTime(dateValue) {
+        const date = new Date(dateValue);
+        if (Number.isNaN(date.getTime())) {
+            throw this.buildAppError('Formato de fecha inválido', 400, 'INVALID_DATETIME_INPUT');
+        }
+        return date.toISOString().slice(0, 19).replace('T', ' ');
+    }
+
     static buildAppError(message, status, code) {
         const appError = new Error(message);
         appError.status = status;
@@ -76,10 +84,12 @@ class Cita {
     static async reservarTemporal(data) {
         try {
             const { usuarioId, mascotaId, fechaInicio, fechaFin, timeoutMinutos } = data;
+            const fechaInicioMySQL = this.toMySQLDateTime(fechaInicio);
+            const fechaFinMySQL = this.toMySQLDateTime(fechaFin);
 
             const [spResult] = await pool.execute(
                 'CALL sp_reservar_cita_temporal(?, ?, ?, ?, ?)',
-                [usuarioId, mascotaId, fechaInicio, fechaFin, timeoutMinutos]
+                [usuarioId, mascotaId, fechaInicioMySQL, fechaFinMySQL, timeoutMinutos]
             );
 
             const idReserva = this.extractIdFromSpResult(spResult, ['idReserva']);
@@ -92,6 +102,9 @@ class Cita {
             console.error('Error en Cita.reservarTemporal:', error);
             const spError = this.mapStoredProcedureError(error);
             if (spError) throw spError;
+            if (error.code === 'ER_TRUNCATED_WRONG_VALUE') {
+                throw this.buildAppError('Formato de fecha inválido', 400, 'INVALID_DATETIME_INPUT');
+            }
             throw new Error('Error al reservar cita temporalmente');
         }
     }
