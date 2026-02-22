@@ -126,6 +126,8 @@ export default function ControlCitasPage() {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [editingYear, setEditingYear] = useState(false);
   const [selectedDayKey, setSelectedDayKey] = useState("");
+  const [mobileDayFocusKey, setMobileDayFocusKey] = useState("");
+  const [weekdayFocusIndex, setWeekdayFocusIndex] = useState(null);
   const [allCitas, setAllCitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -282,6 +284,25 @@ export default function ControlCitasPage() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectedDayKey]);
 
+  useEffect(() => {
+    setMobileDayFocusKey("");
+    setWeekdayFocusIndex(null);
+  }, [monthIndex, year]);
+
+  const handleDayCellTap = (dayKey) => {
+    const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+    const nextFocus = mobileDayFocusKey === dayKey ? "" : dayKey;
+    setMobileDayFocusKey(nextFocus);
+
+    if (isMobile) {
+      if (nextFocus) {
+        setSelectedDayKey(dayKey);
+      } else {
+        setSelectedDayKey("");
+      }
+    }
+  };
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -335,7 +356,8 @@ export default function ControlCitasPage() {
 
       <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 relative">
+          <div className="flex flex-col gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-2 relative">
             <button
               type="button"
               onClick={() => {
@@ -390,8 +412,9 @@ export default function ControlCitasPage() {
                 {year}
               </button>
             )}
+            </div>
 
-            <div className="flex flex-wrap items-center gap-1 md:ml-2">
+            <div className="flex flex-wrap items-center gap-1 md:hidden">
               {stateKeys.map((code) => (
                 <span key={`legend-inline-${code}`} className={`rounded-full px-2 py-1 text-[11px] ${STATUS_META[code].chip}`}>
                   {STATUS_META[code].legend}
@@ -399,6 +422,24 @@ export default function ControlCitasPage() {
               ))}
             </div>
           </div>
+
+          <div className="hidden md:flex flex-wrap items-center gap-1">
+            {stateKeys.map((code) => (
+              <span key={`legend-inline-desktop-${code}`} className={`rounded-full px-2 py-1 text-[11px] ${STATUS_META[code].chip}`}>
+                {STATUS_META[code].legend}
+              </span>
+            ))}
+          </div>
+
+          {mobileDayFocusKey && (
+            <button
+              type="button"
+              onClick={() => setMobileDayFocusKey("")}
+              className="md:hidden rounded-md border border-slate-600 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700/50"
+            >
+              Ver todo el mes
+            </button>
+          )}
         </div>
 
         {loading && <p className="text-sm text-slate-300">Cargando citas...</p>}
@@ -407,10 +448,21 @@ export default function ControlCitasPage() {
         {!loading && !error && (
           <div className="space-y-2">
             <div className="grid grid-cols-7 gap-2">
-              {WEEK_DAYS.map((day) => (
-                <div key={day} className="rounded-md bg-slate-800/80 border border-slate-700 px-2 py-1 text-xs text-slate-200 text-center">
+              {WEEK_DAYS.map((day, dayIndex) => (
+                <button
+                  type="button"
+                  key={day}
+                  onClick={(event) => {
+                    setWeekdayFocusIndex((prev) => (prev === dayIndex ? null : dayIndex));
+                    event.currentTarget.blur();
+                  }}
+                  className={
+                    (weekdayFocusIndex === dayIndex ? "bg-rose-600 text-white border-rose-400/70" : "bg-slate-800/80 text-slate-200") +
+                    " rounded-md border border-slate-700 px-2 py-1 text-xs text-center focus:outline-none focus:ring-0"
+                  }
+                >
                   {day}
-                </div>
+                </button>
               ))}
             </div>
 
@@ -421,10 +473,20 @@ export default function ControlCitasPage() {
                 }
 
                 const list = citasByDay.get(cell.dayKey) || [];
+                const cellWeekday = new Date(Date.UTC(year, monthIndex, cell.day)).getUTCDay();
+                const hideOnMobile = mobileDayFocusKey && mobileDayFocusKey !== cell.dayKey;
+                const hideByWeekday = weekdayFocusIndex !== null && weekdayFocusIndex !== cellWeekday;
+                const isHidden = hideOnMobile || hideByWeekday;
 
                 return (
-                  <div key={cell.key} className="rounded-md border border-slate-700 bg-slate-900/30 min-h-28 p-2 space-y-1">
-                    <p className="text-xs text-slate-300 font-semibold">{cell.day}</p>
+                  <div key={cell.key} className={`rounded-md border border-slate-700 bg-slate-900/30 min-h-28 p-2 space-y-1 ${isHidden ? "hidden" : ""}`}>
+                    <button
+                      type="button"
+                      onClick={() => handleDayCellTap(cell.dayKey)}
+                      className="text-xs text-slate-300 font-semibold hover:text-white"
+                    >
+                      {cell.day}
+                    </button>
                     {list.length === 0 && <p className="text-[11px] text-slate-500">Sin citas</p>}
                     {list.length > 2 ? (
                       <div className="flex flex-wrap gap-1 pt-1">
