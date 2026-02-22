@@ -208,15 +208,15 @@ class Cita {
                     m.Nombre AS mascotaNombre,
                     m.Propietario AS propietarioId,
                     CONCAT(p.Nombre, ' ', p.Apellidos) AS propietarioNombre,
-                    c.fecha_inicio AS fechaInicio,
-                    c.fecha_fin AS fechaFin,
+                    DATE_FORMAT(c.fecha_inicio, '%Y-%m-%d %H:%i:%s') AS fechaInicio,
+                    DATE_FORMAT(c.fecha_fin, '%Y-%m-%d %H:%i:%s') AS fechaFin,
                     c.estado AS estado,
                     c.motivo AS motivo,
                     c.notas AS notas,
                     c.creada_por AS creadaPor,
-                    c.fecha_creacion AS fechaCreacion,
+                    DATE_FORMAT(c.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fechaCreacion,
                     c.modificada_por AS modificadaPor,
-                    c.fecha_actualizacion AS fechaActualizacion
+                    DATE_FORMAT(c.fecha_actualizacion, '%Y-%m-%d %H:%i:%s') AS fechaActualizacion
                  FROM citas c
                  INNER JOIN mascota m ON m.idMascota = c.mascotaId
                  LEFT JOIN propietario p ON p.idPropietario = m.Propietario
@@ -252,15 +252,15 @@ class Cita {
                     m.Nombre AS mascotaNombre,
                     m.Propietario AS propietarioId,
                     CONCAT(p.Nombre, ' ', p.Apellidos) AS propietarioNombre,
-                    c.fecha_inicio AS fechaInicio,
-                    c.fecha_fin AS fechaFin,
+                    DATE_FORMAT(c.fecha_inicio, '%Y-%m-%d %H:%i:%s') AS fechaInicio,
+                    DATE_FORMAT(c.fecha_fin, '%Y-%m-%d %H:%i:%s') AS fechaFin,
                     c.estado AS estado,
                     c.motivo AS motivo,
                     c.notas AS notas,
                     c.creada_por AS creadaPor,
-                    c.fecha_creacion AS fechaCreacion,
+                    DATE_FORMAT(c.fecha_creacion, '%Y-%m-%d %H:%i:%s') AS fechaCreacion,
                     c.modificada_por AS modificadaPor,
-                    c.fecha_actualizacion AS fechaActualizacion
+                    DATE_FORMAT(c.fecha_actualizacion, '%Y-%m-%d %H:%i:%s') AS fechaActualizacion
                  FROM citas c
                  INNER JOIN mascota m ON m.idMascota = c.mascotaId
                  LEFT JOIN propietario p ON p.idPropietario = m.Propietario
