@@ -19,6 +19,7 @@ const authRoutes = require('./routes/authRoutes');
 const propietarioRoutes = require('./routes/propietarioRoutes');
 const mascotaRoutes = require('./routes/mascotaRoutes');
 const historialRoutes = require('./routes/historialRoutes');
+const citaRoutes = require('./routes/citaRoutes');
 
 // Crear aplicación Express
 const app = express();
@@ -74,6 +75,7 @@ app.get('/', (req, res) => {
         endpoints: {
             users: `${API_PREFIX}/users`,
             propietarios: `${API_PREFIX}/propietarios`,
+            citas: `${API_PREFIX}/citas`,
             auth: `${API_PREFIX}/auth`,
             health: '/',
             docs: '/docs'
@@ -112,6 +114,7 @@ app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/propietarios`, propietarioRoutes);
 app.use(`${API_PREFIX}/mascotas`, mascotaRoutes);
 app.use(`${API_PREFIX}/historiales`, historialRoutes);
+app.use(`${API_PREFIX}/citas`, citaRoutes);
 
 // Ruta para documentación básica
 app.get('/docs', (req, res) => {
@@ -161,6 +164,14 @@ app.get('/docs', (req, res) => {
             'POST /historiales': 'Crear nuevo historial',
             'PUT /historiales/:id': 'Actualizar historial',
             'DELETE /historiales/:id': 'Eliminar historial'
+            ,
+            // Citas
+            'GET /citas?fechaDesde=&fechaHasta=&estado=&mascotaId=': 'Listar citas por rango, estado y mascota',
+            'GET /citas/:id': 'Obtener detalle de una cita por ID',
+            'GET /citas/reservas/:idReserva/estado': 'Consultar si la reserva sigue activa y su tiempo restante',
+            'POST /citas/reservar': 'Reservar espacio temporal para cita',
+            'POST /citas/confirmar': 'Confirmar reserva y crear cita definitiva',
+            'POST /citas/:id/cancelar': 'Cancelar una cita existente'
         },
         examples: {
             register: {
@@ -193,7 +204,8 @@ app.use((req, res) => {
             auth: `${API_PREFIX}/auth`,
             users: `${API_PREFIX}/users`,
             propietarios: `${API_PREFIX}/propietarios`,
-            mascotas: `${API_PREFIX}/mascotas`
+            mascotas: `${API_PREFIX}/mascotas`,
+            citas: `${API_PREFIX}/citas`
         }
     });
 });
