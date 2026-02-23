@@ -13,6 +13,7 @@ router.get('/search', authenticateToken, HistorialController.searchHistoriales);
 // Búsqueda avanzada por campos en body JSON
 router.post('/search', authenticateToken, HistorialController.getAllHistoriales);
 router.get('/stats', authenticateToken, HistorialController.getHistorialStats);
+router.get('/cita/:idCita', authenticateToken, HistorialController.getHistorialByCitaId);
 router.get('/:id', authenticateToken, validateHistorialId, HistorialController.getHistorialById);
 router.post('/', authenticateToken, validateHistorial, HistorialController.createHistorial);
 router.put('/:id', authenticateToken, validateHistorialId, validateHistorial, HistorialController.updateHistorial);

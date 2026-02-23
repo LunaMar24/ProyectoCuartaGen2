@@ -333,3 +333,77 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+ALTER TABLE historial_medico
+ADD COLUMN citaId INT NULL,
+ADD UNIQUE KEY uk_historial_cita (citaId),
+ADD CONSTRAINT fk_historial_cita
+    FOREIGN KEY (citaId)
+    REFERENCES citas(idCita)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
+	
+	
+	
+DELIMITER $$
+
+CREATE PROCEDURE sp_crear_historial_y_cerrar_cita(
+    IN p_idCita INT,
+    IN p_mascotaId INT,
+    IN p_fechaAtencion DATETIME,
+    IN p_motivo VARCHAR(500),
+    IN p_diagnostico VARCHAR(2000),
+    IN p_usuarioId INT
+)
+BEGIN
+    DECLARE v_estado VARCHAR(1);
+
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    START TRANSACTION;
+
+    -- Verificar cita y bloquear
+    SELECT estado INTO v_estado
+    FROM citas
+    WHERE idCita = p_idCita
+    FOR UPDATE;
+
+    IF v_estado IS NULL THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La cita no existe';
+    END IF;
+
+    IF v_estado NOT IN ('P','F') THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La cita no puede cerrarse';
+    END IF;
+
+    -- Crear historial
+    INSERT INTO historial_medico (
+        Mascota,
+        FechaAtencion,
+        Motivo,
+        Diagnostico,
+        citaId
+    )
+    VALUES (
+        p_mascotaId,
+        p_fechaAtencion,
+        p_motivo,
+        p_diagnostico,
+        p_idCita
+    );
+
+    -- Cerrar cita
+    UPDATE citas
+    SET estado = 'T',
+        modificada_por = p_usuarioId
+    WHERE idCita = p_idCita;
+
+    COMMIT;
+
+END$$
+
+DELIMITER ;

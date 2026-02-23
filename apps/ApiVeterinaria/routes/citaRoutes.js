@@ -14,5 +14,7 @@ router.get('/:id', authenticateToken, validateCitaId, CitaController.getCitaById
 router.post('/reservar', authenticateToken, validateCitaReserva, CitaController.reservarCita);
 router.post('/confirmar', authenticateToken, validateCitaConfirmacion, CitaController.confirmarCita);
 router.post('/:id/cancelar', authenticateToken, validateCitaId, CitaController.cancelarCita);
+router.post('/:id/confirmar', authenticateToken, validateCitaId, CitaController.marcarConfirmada);
+router.post('/:id/no-asistio', authenticateToken, validateCitaId, CitaController.marcarNoAsistio);
 
 module.exports = router;

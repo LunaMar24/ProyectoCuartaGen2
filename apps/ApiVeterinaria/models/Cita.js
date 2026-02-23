@@ -147,6 +147,64 @@ class Cita {
         }
     }
 
+    static async marcarConfirmada(data) {
+        try {
+            const { idCita, usuarioId } = data;
+
+            const [result] = await pool.execute(
+                `UPDATE citas
+                 SET estado = 'F',
+                     modificada_por = ?
+                 WHERE idCita = ?
+                   AND estado = 'P'`,
+                [usuarioId, idCita]
+            );
+
+            if (!result || result.affectedRows === 0) {
+                const [rows] = await pool.execute('SELECT estado FROM citas WHERE idCita = ? LIMIT 1', [idCita]);
+                if (!rows || rows.length === 0) {
+                    throw this.buildAppError('La cita no existe', 404, 'APPOINTMENT_NOT_FOUND');
+                }
+                throw this.buildAppError('La cita no puede confirmarse', 409, 'APPOINTMENT_NOT_CONFIRMABLE');
+            }
+
+            return { idCita };
+        } catch (error) {
+            console.error('Error en Cita.marcarConfirmada:', error);
+            if (error.status && error.code) throw error;
+            throw new Error('Error al confirmar cita');
+        }
+    }
+
+    static async marcarNoAsistio(data) {
+        try {
+            const { idCita, usuarioId } = data;
+
+            const [result] = await pool.execute(
+                `UPDATE citas
+                 SET estado = 'N',
+                     modificada_por = ?
+                 WHERE idCita = ?
+                   AND estado = 'F'`,
+                [usuarioId, idCita]
+            );
+
+            if (!result || result.affectedRows === 0) {
+                const [rows] = await pool.execute('SELECT estado FROM citas WHERE idCita = ? LIMIT 1', [idCita]);
+                if (!rows || rows.length === 0) {
+                    throw this.buildAppError('La cita no existe', 404, 'APPOINTMENT_NOT_FOUND');
+                }
+                throw this.buildAppError('La cita no puede marcarse como no asistió', 409, 'APPOINTMENT_NOT_NO_SHOWABLE');
+            }
+
+            return { idCita };
+        } catch (error) {
+            console.error('Error en Cita.marcarNoAsistio:', error);
+            if (error.status && error.code) throw error;
+            throw new Error('Error al marcar cita como no asistió');
+        }
+    }
+
     static async listarCitas(filters = {}) {
         try {
             let page = parseInt(filters.page, 10) || 1;

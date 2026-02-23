@@ -1,33 +1,34 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiUrl, getApiErrorMessage } from "@/lib/api";
 
 const STATUS_META = {
   P: {
-    label: "Pendientes",
-    legend: "Pendientes",
+    label: "Pendiente",
+    legend: "Pendiente",
     chip: "border border-amber-400/40 bg-amber-500/20 text-amber-200",
   },
   F: {
-    label: "Confirmadas",
-    legend: "Confirmadas",
-    chip: "border border-orange-400/40 bg-orange-500/20 text-orange-200",
+    label: "Confirmada",
+    legend: "Confirmada",
+    chip: "border border-emerald-400/40 bg-emerald-500/20 text-emerald-200",
   },
   C: {
-    label: "Canceladas",
-    legend: "Canceladas",
-    chip: "border border-rose-400/40 bg-rose-500/20 text-rose-200 line-through",
+    label: "Cancelada",
+    legend: "Cancelada",
+    chip: "border border-rose-400/40 bg-rose-500/20 text-rose-200",
   },
   T: {
     label: "Completada",
     legend: "Completada",
-    chip: "border border-emerald-400/40 bg-emerald-500/20 text-emerald-200",
+    chip: "border border-sky-400/40 bg-sky-500/20 text-sky-200",
   },
   N: {
     label: "No Asistió",
     legend: "No Asistió",
-    chip: "border border-sky-400/40 bg-sky-500/20 text-sky-200",
+    chip: "border border-orange-400/40 bg-orange-500/20 text-orange-200",
   },
 };
 
@@ -109,6 +110,17 @@ const formatDayTitle = (dayKey) => {
   return raw.charAt(0).toUpperCase() + raw.slice(1);
 };
 
+const getWeekdayNameFromDayKey = (dayKey) => {
+  if (!dayKey) return "";
+  const [year, month, day] = String(dayKey).split("-").map(Number);
+  const dt = new Date(Date.UTC(year, (month || 1) - 1, day || 1));
+  const raw = new Intl.DateTimeFormat("es-CR", {
+    weekday: "long",
+    timeZone: "UTC",
+  }).format(dt);
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+};
+
 const readPagination = (payload) => {
   const pagination = payload?.pagination || {};
   const currentPage = Number(pagination.currentPage || 1);
@@ -128,6 +140,7 @@ export default function ControlCitasPage() {
   const [selectedDayKey, setSelectedDayKey] = useState("");
   const [mobileDayFocusKey, setMobileDayFocusKey] = useState("");
   const [weekdayFocusIndex, setWeekdayFocusIndex] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [allCitas, setAllCitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -201,7 +214,7 @@ export default function ControlCitasPage() {
     };
 
     fetchMonthCitas();
-  }, [monthIndex, token, year]);
+  }, [monthIndex, refreshKey, token, year]);
 
   const visibleCitas = useMemo(() => {
     const mascotaText = mascotaFilter.trim().toLowerCase();
@@ -266,6 +279,7 @@ export default function ControlCitasPage() {
 
   const stateKeys = Object.keys(STATUS_META);
   const selectedDayList = selectedDayKey ? (citasByDay.get(selectedDayKey) || []) : [];
+  const focusedWeekdayLabel = useMemo(() => getWeekdayNameFromDayKey(mobileDayFocusKey), [mobileDayFocusKey]);
 
   useEffect(() => {
     if (selectedDayKey && selectedDayList.length === 0) {
@@ -289,17 +303,18 @@ export default function ControlCitasPage() {
     setWeekdayFocusIndex(null);
   }, [monthIndex, year]);
 
-  const handleDayCellTap = (dayKey) => {
+  const handleDayCellTap = (dayKey, citasDelDia = []) => {
+    const hasEntries = Array.isArray(citasDelDia) && citasDelDia.length > 0;
+    setSelectedDayKey(hasEntries ? dayKey : "");
+
     const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+
     const nextFocus = mobileDayFocusKey === dayKey ? "" : dayKey;
     setMobileDayFocusKey(nextFocus);
 
-    if (isMobile) {
-      if (nextFocus) {
-        setSelectedDayKey(dayKey);
-      } else {
-        setSelectedDayKey("");
-      }
+    if (!nextFocus) {
+      setSelectedDayKey("");
     }
   };
 
@@ -310,6 +325,14 @@ export default function ControlCitasPage() {
           <h1 className="text-xl font-semibold">Control Citas</h1>
           <p className="text-sm text-slate-300">Vista calendario con filtros por estado, mascota y propietario.</p>
         </div>
+        <button
+          type="button"
+          onClick={() => setRefreshKey((prev) => prev + 1)}
+          disabled={loading}
+          className="rounded-md border border-slate-600 px-3 py-2 text-sm text-slate-200 hover:bg-slate-700/50 disabled:opacity-60"
+        >
+          {loading ? "Actualizando..." : "Actualizar"}
+        </button>
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
@@ -447,24 +470,30 @@ export default function ControlCitasPage() {
 
         {!loading && !error && (
           <div className="space-y-2">
-            <div className="grid grid-cols-7 gap-2">
-              {WEEK_DAYS.map((day, dayIndex) => (
-                <button
-                  type="button"
-                  key={day}
-                  onClick={(event) => {
-                    setWeekdayFocusIndex((prev) => (prev === dayIndex ? null : dayIndex));
-                    event.currentTarget.blur();
-                  }}
-                  className={
-                    (weekdayFocusIndex === dayIndex ? "bg-rose-600 text-white border-rose-400/70" : "bg-slate-800/80 text-slate-200") +
-                    " rounded-md border border-slate-700 px-2 py-1 text-xs text-center focus:outline-none focus:ring-0"
-                  }
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
+            {mobileDayFocusKey ? (
+              <div className="rounded-md bg-slate-800/80 border border-slate-700 px-3 py-2 text-sm text-slate-100">
+                Día seleccionado: <span className="font-semibold">{focusedWeekdayLabel}</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-7 gap-2">
+                {WEEK_DAYS.map((day, dayIndex) => (
+                  <button
+                    type="button"
+                    key={day}
+                    onClick={(event) => {
+                      setWeekdayFocusIndex((prev) => (prev === dayIndex ? null : dayIndex));
+                      event.currentTarget.blur();
+                    }}
+                    className={
+                      (weekdayFocusIndex === dayIndex ? "bg-rose-600 text-white border-rose-400/70" : "bg-slate-800/80 text-slate-200") +
+                      " rounded-md border border-slate-700 px-2 py-1 text-xs text-center focus:outline-none focus:ring-0"
+                    }
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
               {monthCells.map((cell) => {
@@ -482,7 +511,7 @@ export default function ControlCitasPage() {
                   <div key={cell.key} className={`rounded-md border border-slate-700 bg-slate-900/30 min-h-28 p-2 space-y-1 ${isHidden ? "hidden" : ""}`}>
                     <button
                       type="button"
-                      onClick={() => handleDayCellTap(cell.dayKey)}
+                      onClick={() => handleDayCellTap(cell.dayKey, list)}
                       className="text-xs text-slate-300 font-semibold hover:text-white"
                     >
                       {cell.day}
@@ -513,9 +542,19 @@ export default function ControlCitasPage() {
                         const status = STATUS_META[code] || STATUS_META.P;
                         return (
                           <div key={cita.idCita} className={`rounded px-1.5 py-1 text-[11px] leading-tight ${status.chip}`}>
-                            <p className="font-semibold">{formatHour(cita.fechaInicio)} · {status.label}</p>
-                            <p className="truncate">{cita.mascotaNombre || "Mascota"}</p>
-                            <p className="truncate">{cita.propietarioNombre || "Propietario"}</p>
+                            <div className={code === "C" ? "line-through" : ""}>
+                              <p className="font-semibold">{formatHour(cita.fechaInicio)} · {status.label}</p>
+                              <p className="truncate">{cita.mascotaNombre || "Mascota"}</p>
+                              <p className="truncate">{cita.propietarioNombre || "Propietario"}</p>
+                            </div>
+                            <div className="pt-1 flex justify-end">
+                              <Link
+                                href={`/dashboard/citas/${cita.idCita}`}
+                                className="rounded-md border border-slate-600 px-2 py-0.5 text-[11px] text-slate-100 hover:bg-slate-700/50"
+                              >
+                                Detalle
+                              </Link>
+                            </div>
                           </div>
                         );
                       })
@@ -537,7 +576,7 @@ export default function ControlCitasPage() {
             className="absolute inset-0 bg-black/60"
           />
 
-          <div className="relative z-10 w-full max-w-2xl rounded-lg border border-white/10 bg-slate-900 p-4 space-y-3 max-h-[85vh] overflow-auto">
+          <div className="relative z-10 w-full max-w-2xl rounded-lg border border-white/10 bg-slate-900 p-4 space-y-3 max-h-[85vh] overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-300">Detalle del día</p>
@@ -552,15 +591,25 @@ export default function ControlCitasPage() {
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[62vh] overflow-y-auto pr-1">
               {selectedDayList.map((cita) => {
                 const code = String(cita?.estado || "").toUpperCase();
                 const status = STATUS_META[code] || STATUS_META.P;
                 return (
                   <div key={`detalle-${cita.idCita}`} className={`rounded-md border px-3 py-2 text-sm ${status.chip}`}>
+                    <div className={code === "C" ? "line-through" : ""}>
                       <p className="font-semibold">{formatHour(cita.fechaInicio)} - {formatHour(cita.fechaFin)} · {status.label}</p>
-                    <p>Mascota: {cita?.mascotaNombre || "-"}</p>
-                    <p>Propietario: {cita?.propietarioNombre || "-"}</p>
+                      <p>Mascota: {cita?.mascotaNombre || "-"}</p>
+                      <p>Propietario: {cita?.propietarioNombre || "-"}</p>
+                    </div>
+                    <div className="pt-1 flex justify-end">
+                      <Link
+                        href={`/dashboard/citas/${cita.idCita}`}
+                        className="shrink-0 rounded-md border border-slate-600 px-2 py-0.5 text-xs text-slate-100 hover:bg-slate-700/50"
+                      >
+                        Detalle
+                      </Link>
+                    </div>
                   </div>
                 );
               })}

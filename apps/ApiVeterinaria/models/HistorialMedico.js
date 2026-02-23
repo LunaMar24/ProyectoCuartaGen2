@@ -66,11 +66,39 @@ class HistorialMedico {
         }
     }
 
+    static async findByCitaId(citaId) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT idHistorial as id, Mascota as mascota, FechaAtencion as fechaAtencion, Motivo as motivo, Diagnostico as diagnostico FROM historial_medico WHERE citaId = ? LIMIT 1',
+                [citaId]
+            );
+            return rows.length > 0 ? rows[0] : null;
+        } catch (error) {
+            console.error('Error en HistorialMedico.findByCitaId:', error);
+            throw new Error('Error al buscar historial por cita');
+        }
+    }
+
     static async create(data) {
         try {
-            const { mascota, fechaAtencion, motivo, diagnostico } = data;
+            const { mascota, fechaAtencion, motivo, diagnostico, idCita, usuarioId } = data;
             // Normalizar fecha a formato MySQL DATETIME
             const fecha = fechaAtencion ? HistorialMedico._formatDateForMySQL(fechaAtencion) : HistorialMedico._formatDateForMySQL(new Date());
+
+            if (idCita !== undefined && idCita !== null) {
+                if (!usuarioId) {
+                    throw new Error('usuarioId es requerido para crear historial desde cita');
+                }
+
+                await pool.execute(
+                    'CALL sp_crear_historial_y_cerrar_cita(?, ?, ?, ?, ?, ?)',
+                    [idCita, mascota, fecha, motivo, diagnostico || '', usuarioId]
+                );
+
+                const historialPorCita = await this.findByCitaId(idCita);
+                return historialPorCita;
+            }
+
             const [result] = await pool.execute(
                 'INSERT INTO historial_medico (Mascota, FechaAtencion, Motivo, Diagnostico) VALUES (?, ?, ?, ?)',
                 [mascota, fecha, motivo, diagnostico]
@@ -80,6 +108,14 @@ class HistorialMedico {
             return newRecord;
         } catch (error) {
             console.error('Error en HistorialMedico.create:', error);
+            const isSignalError = error && (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000');
+            if (isSignalError) {
+                const message = (error.sqlMessage || error.message || '').trim() || 'Error de validación en procedimiento almacenado';
+                const appError = new Error(message);
+                appError.status = 409;
+                appError.code = 'SP_VALIDATION_ERROR';
+                throw appError;
+            }
             throw new Error('Error al crear historial medico');
         }
     }

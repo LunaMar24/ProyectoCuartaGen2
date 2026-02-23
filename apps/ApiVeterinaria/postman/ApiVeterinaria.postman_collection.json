@@ -324,11 +324,34 @@
     "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/1", "host": ["{{baseUrl}}"], "path": ["historiales","1"] } }
         },
         {
-          "name": "Crear historial",
+          "name": "Get historial por cita (idCita)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/historiales/cita/3",
+              "host": ["{{baseUrl}}"],
+              "path": ["historiales", "cita", "3"]
+            }
+          }
+        },
+        {
+          "name": "Crear historial (manual)",
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
             "body": { "mode": "raw", "raw": "{\n  \"mascota\": 1,\n  \"fechaAtencion\": \"2025-11-01T10:00:00Z\",\n  \"motivo\": \"Consulta por vómitos\",\n  \"diagnostico\": \"Probable gastroenteritis\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] }
+          }
+        },
+        {
+          "name": "Crear historial desde cita (idCita)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"mascota\": 4,\n  \"idCita\": 3,\n  \"fechaAtencion\": \"2026-02-24T09:00:00Z\",\n  \"motivo\": \"Baño completo\",\n  \"diagnostico\": \"Paciente atendido, sin hallazgos clínicos\"\n}" },
             "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] }
           }
         },

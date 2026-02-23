@@ -453,7 +453,12 @@ const validateHistorial = [
         .trim()
         .optional()
         .isLength({ max: 2000 })
-        .withMessage('El diagnóstico no puede exceder 2000 caracteres')
+        .withMessage('El diagnóstico no puede exceder 2000 caracteres'),
+
+    body('idCita')
+        .optional({ nullable: true })
+        .isInt({ min: 1 })
+        .withMessage('El idCita debe ser un ID numérico válido')
 ];
 
 const validateHistorialId = [
