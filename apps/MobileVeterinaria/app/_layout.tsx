@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AppBackgroundColor } from '@/constants/theme';
 import { AuthContext, User } from '../context/AuthContext';
 import { Redirect } from 'expo-router';
 import LoginScreen from './screens/LoginScreen';
@@ -64,6 +65,8 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} />
+          <Stack.Screen name="screens/OwnerProfileScreen" options={{ title: 'Propietario' }} />
+          <Stack.Screen name="screens/EditOwnerScreen" options={{ title: 'Editar propietario' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
@@ -74,7 +77,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: AppBackgroundColor,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
