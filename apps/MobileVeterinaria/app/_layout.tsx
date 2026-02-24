@@ -8,19 +8,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AppBackgroundColor } from '@/constants/theme';
 import { AuthContext, User } from '../context/AuthContext';
-import { Redirect } from 'expo-router';
 import LoginScreen from './screens/LoginScreen';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [checking, setChecking] = useState(true);
-  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -63,9 +57,17 @@ export default function RootLayout() {
     <AuthContext.Provider value={{ token, user, login, logout }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} />
-          <Stack.Screen name="screens/OwnerProfileScreen" options={{ title: 'Propietario' }} />
+          <Stack.Screen
+            name="screens/OwnerProfileScreen"
+            options={{
+              title: 'Propietario',
+            }}
+          />
+          <Stack.Screen name="screens/OwnerPetsScreen" options={{ title: 'Mis mascotas' }} />
+          <Stack.Screen name="screens/PetAppointmentScreen" options={{ title: 'Crear cita' }} />
+          <Stack.Screen name="screens/PetHistoryScreen" options={{ title: 'Historial Médico' }} />
           <Stack.Screen name="screens/EditOwnerScreen" options={{ title: 'Editar propietario' }} />
         </Stack>
         <StatusBar style="auto" />

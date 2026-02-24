@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { apiUrl } from '../../constants/api';
 import { AppBackgroundColor } from '../../constants/theme';
@@ -52,6 +53,7 @@ const InfoRow = ({ label, value }: InfoRowProps) => (
 
 export default function OwnerProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { token, user } = useAuth();
   const [propietario, setPropietario] = useState<Propietario | null>(null);
   const [loading, setLoading] = useState(true);
@@ -228,19 +230,6 @@ export default function OwnerProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.inlineCards}>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>Creado</Text>
-            <Text style={styles.miniValue}>{formatDate(user?.fecha_creacion)}</Text>
-            <Text style={styles.miniHint}>Fecha del usuario</Text>
-          </View>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>Actualizado</Text>
-            <Text style={styles.miniValue}>{formatDate(user?.fecha_actualizacion)}</Text>
-            <Text style={styles.miniHint}>Último cambio</Text>
-          </View>
-        </View>
-
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Mascotas registradas</Text>
           <Text style={styles.cardParagraph}>
@@ -260,6 +249,19 @@ export default function OwnerProfileScreen() {
           </View>
           {petsError ? <Text style={styles.petCountError}>{petsError}</Text> : null}
         </View>
+
+        <View style={styles.inlineCards}>
+          <View style={styles.miniCard}>
+            <Text style={styles.miniLabel}>Creado</Text>
+            <Text style={styles.miniValue}>{formatDate(user?.fecha_creacion)}</Text>
+            <Text style={styles.miniHint}>Fecha del usuario</Text>
+          </View>
+          <View style={styles.miniCard}>
+            <Text style={styles.miniLabel}>Actualizado</Text>
+            <Text style={styles.miniValue}>{formatDate(user?.fecha_actualizacion)}</Text>
+            <Text style={styles.miniHint}>Último cambio</Text>
+          </View>
+        </View>
       </>
     );
   };
@@ -267,7 +269,7 @@ export default function OwnerProfileScreen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top + 12, 24) }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#22d3ee" />}
     >
       {renderBody()}

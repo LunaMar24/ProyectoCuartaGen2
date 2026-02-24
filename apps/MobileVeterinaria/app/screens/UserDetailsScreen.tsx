@@ -62,7 +62,10 @@ export default function UserDetailsScreen() {
         >
           <Text style={styles.buttonLabel}>Información del propietario</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonBase, styles.secondaryButton]} onPress={() => {}}>
+        <TouchableOpacity
+          style={[styles.buttonBase, styles.secondaryButton]}
+          onPress={() => router.push('/screens/OwnerPetsScreen')}
+        >
           <Text style={styles.buttonLabel}>Mascotas</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.buttonBase, styles.dangerButton]} onPress={logout}>

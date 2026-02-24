@@ -214,6 +214,12 @@ class HistorialMedico {
                 const str = value.toString().trim();
                 if (!str) continue;
 
+                if (field === 'mascota' && /^\d+$/.test(str)) {
+                    conditions.push('idHistorial IN (SELECT idHistorial FROM historial_medico WHERE Mascota = ?)');
+                    params.push(Number(str));
+                    continue;
+                }
+
                 const dbField = fieldMappings[field];
                 if (textFields.includes(field)) {
                     conditions.push(`${dbField} LIKE ?`);
@@ -237,7 +243,8 @@ class HistorialMedico {
 
             const whereClause = conditions.join(' AND ');
             const query = `
-                SELECT idHistorial as id, Mascota as mascota, FechaAtencion as fechaAtencion, Motivo as motivo, Diagnostico as diagnostico
+                SELECT idHistorial as id, Mascota as mascota, FechaAtencion as fechaAtencion, Motivo as motivo, Diagnostico as diagnostico,
+                       (SELECT citaId FROM historial_medico hm WHERE hm.idHistorial = vhistorial_medico.idHistorial LIMIT 1) as idCita
                 FROM vhistorial_medico
                 WHERE ${whereClause}
                 ORDER BY FechaAtencion DESC
