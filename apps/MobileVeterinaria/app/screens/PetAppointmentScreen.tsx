@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -45,6 +48,12 @@ const toDateInputValue = (dateInput: Date | string) => {
   const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+const toDisplayDate = (isoDateText: string) => {
+  const [year, month, day] = isoDateText.split('-');
+  if (!year || !month || !day) return isoDateText;
+  return `${day}/${month}/${year}`;
 };
 
 const formatHourOptionLabel = (hour24: number) => {
@@ -102,6 +111,13 @@ export default function PetAppointmentScreen() {
     d.setMilliseconds(0);
     const roundedMinute = Math.floor(d.getMinutes() / DEFAULT_DURATION_MINUTES) * DEFAULT_DURATION_MINUTES;
     d.setMinutes(roundedMinute);
+
+    const currentTotalMinutes = d.getHours() * 60 + d.getMinutes();
+    const lastAllowedStartMinutes = WORKING_HOUR_END * 60 - DEFAULT_DURATION_MINUTES;
+    if (currentTotalMinutes > lastAllowedStartMinutes) {
+      d.setDate(d.getDate() + 1);
+    }
+
     return d;
   }, []);
 
@@ -120,6 +136,13 @@ export default function PetAppointmentScreen() {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [focusedField, setFocusedField] = useState<'motivo' | 'notas' | null>(null);
+
+  const scrollRef = useRef<ScrollView | null>(null);
+  const scrollYRef = useRef(0);
+  const motivoInputRef = useRef<TextInput | null>(null);
+  const notasInputRef = useRef<TextInput | null>(null);
 
   const selectedDate = useMemo(() => {
     const [year, month, day] = fechaInicioDate.split('-').map(Number);
@@ -145,11 +168,13 @@ export default function PetAppointmentScreen() {
       ...new Set(
         allowedSlots
           .filter((slot) => slot.hour === selectedHour)
-          .map((slot) => String(slot.minute).padStart(2, '0'))
+          .map((slot) => slot.minute)
       ),
     ];
-    return uniq;
+    return uniq.map((minute) => String(minute).padStart(2, '0'));
   }, [allowedSlots, horaInicio]);
+
+  const pickerItemColor = Platform.OS === 'android' ? '#0f172a' : '#e32b2b';
 
   const clearPolling = () => {
     if (pollRef.current) {
@@ -163,11 +188,56 @@ export default function PetAppointmentScreen() {
   }, []);
 
   useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates?.height || 0);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!keyboardHeight || !focusedField) return;
+    const ref = focusedField === 'motivo' ? motivoInputRef.current : notasInputRef.current;
+    if (!ref) return;
+
+    const timer = setTimeout(() => {
+      ref.measureInWindow((_x, y, _width, height) => {
+        const windowHeight = Dimensions.get('window').height;
+        const keyboardTop = windowHeight - keyboardHeight;
+        const inputBottom = y + height;
+        const safeGap = 14;
+        const overlap = inputBottom + safeGap - keyboardTop;
+
+        if (overlap > 0) {
+          const nextY = Math.max(0, scrollYRef.current + overlap + 12);
+          scrollRef.current?.scrollTo({ y: nextY, animated: true });
+        }
+      });
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [keyboardHeight, focusedField, notas]);
+
+  useEffect(() => {
     if (hourOptions.length === 0) return;
     const hourExists = hourOptions.some((option) => option.value === String(horaInicio));
     const nextHour = hourExists ? String(horaInicio) : hourOptions[0].value;
-    const minuteExists = minuteOptions.includes(String(minutoInicio).padStart(2, '0'));
-    const nextMinute = minuteExists ? String(minutoInicio).padStart(2, '0') : (minuteOptions[0] || '00');
+
+    const minutesForHour = [
+      ...new Set(
+        allowedSlots
+          .filter((slot) => String(slot.hour) === String(nextHour))
+          .map((slot) => String(slot.minute).padStart(2, '0'))
+      ),
+    ];
+    const minuteExists = minutesForHour.includes(String(minutoInicio).padStart(2, '0'));
+    const nextMinute = minuteExists ? String(minutoInicio).padStart(2, '0') : (minutesForHour[0] || '00');
 
     if (String(horaInicio) !== nextHour) {
       setHoraInicio(nextHour);
@@ -175,7 +245,7 @@ export default function PetAppointmentScreen() {
     if (String(minutoInicio).padStart(2, '0') !== nextMinute) {
       setMinutoInicio(nextMinute);
     }
-  }, [hourOptions, minuteOptions, horaInicio, minutoInicio]);
+  }, [hourOptions, allowedSlots, horaInicio, minutoInicio]);
 
   const onDateChange = (_event: DateTimePickerEvent, pickedDate?: Date) => {
     if (Platform.OS === 'android') {
@@ -358,10 +428,29 @@ export default function PetAppointmentScreen() {
   const reservaActiva = !!(reserva?.activa && !reserva?.debeReiniciarFlujo);
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top + 12, 24) }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Math.max(insets.top, 12)}
     >
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        onScroll={(event) => {
+          scrollYRef.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(insets.top + 12, 24),
+            paddingBottom: Math.max(insets.bottom + 24, 24) + keyboardHeight,
+          },
+        ]}
+      >
       <View style={styles.petCard}>
         <Text style={styles.sectionTitle}>Crear cita</Text>
         <Text style={styles.sectionSubtitle}>Mascota: {petName}</Text>
@@ -376,7 +465,7 @@ export default function PetAppointmentScreen() {
 
         <Text style={styles.label}>Fecha</Text>
         <TouchableOpacity style={styles.dateSelector} onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.dateSelectorText}>{fechaInicioDate}</Text>
+          <Text style={styles.dateSelectorText}>{toDisplayDate(fechaInicioDate)}</Text>
         </TouchableOpacity>
         {showDatePicker ? (
           <DateTimePicker
@@ -399,7 +488,7 @@ export default function PetAppointmentScreen() {
                 dropdownIconColor="#cbd5f5"
               >
                 {hourOptions.map((option) => (
-                  <Picker.Item key={option.value} label={option.label} value={option.value} color="#f8fafc" />
+                  <Picker.Item key={option.value} label={option.label} value={option.value} color={pickerItemColor} />
                 ))}
               </Picker>
             </View>
@@ -411,10 +500,10 @@ export default function PetAppointmentScreen() {
                 selectedValue={String(minutoInicio).padStart(2, '0')}
                 onValueChange={(value) => setMinutoInicio(String(value).padStart(2, '0'))}
                 style={styles.picker}
-                dropdownIconColor="#cbd5f5"
+                dropdownIconColor="#cbd5f5"                
               >
                 {minuteOptions.map((minute) => (
-                  <Picker.Item key={minute} label={minute} value={minute} color="#f8fafc" />
+                  <Picker.Item key={minute} label={minute} value={minute} color={pickerItemColor} />
                 ))}
               </Picker>
             </View>
@@ -451,18 +540,44 @@ export default function PetAppointmentScreen() {
 
         <Text style={styles.label}>Motivo</Text>
         <TextInput
+          ref={motivoInputRef}
           style={styles.input}
           value={motivo}
           onChangeText={setMotivo}
+          onFocus={() => setFocusedField('motivo')}
+          onBlur={() => setFocusedField((prev) => (prev === 'motivo' ? null : prev))}
           placeholder="Consulta general"
           placeholderTextColor="#94a3b8"
         />
 
         <Text style={styles.label}>Notas</Text>
         <TextInput
+          ref={notasInputRef}
           style={[styles.input, styles.notesInput]}
           value={notas}
           onChangeText={setNotas}
+          onFocus={() => setFocusedField('notas')}
+          onBlur={() => setFocusedField((prev) => (prev === 'notas' ? null : prev))}
+          onContentSizeChange={() => {
+            if (focusedField === 'notas' && keyboardHeight > 0) {
+              const ref = notasInputRef.current;
+              if (!ref) return;
+              setTimeout(() => {
+                ref.measureInWindow((_x, y, _width, height) => {
+                  const windowHeight = Dimensions.get('window').height;
+                  const keyboardTop = windowHeight - keyboardHeight;
+                  const inputBottom = y + height;
+                  const safeGap = 14;
+                  const overlap = inputBottom + safeGap - keyboardTop;
+
+                  if (overlap > 0) {
+                    const nextY = Math.max(0, scrollYRef.current + overlap + 8);
+                    scrollRef.current?.scrollTo({ y: nextY, animated: true });
+                  }
+                });
+              }, 40);
+            }
+          }}
           placeholder="Notas adicionales"
           placeholderTextColor="#94a3b8"
           multiline
@@ -482,12 +597,17 @@ export default function PetAppointmentScreen() {
           <ActivityIndicator color="#22d3ee" />
         </View>
       ) : null}
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+    backgroundColor: AppBackgroundColor,
+  },
+  scroll: {
     flex: 1,
     backgroundColor: AppBackgroundColor,
   },
@@ -564,10 +684,13 @@ const styles = StyleSheet.create({
     borderColor: '#1e293b',
     borderRadius: 12,
     overflow: 'hidden',
+    minHeight: 56,
+    justifyContent: 'center',
   },
   picker: {
     color: '#f8fafc',
-    height: 48,
+    backgroundColor: '#111c2e',        
+    height: 56,
   },
   fixedInfo: {
     color: '#94a3b8',

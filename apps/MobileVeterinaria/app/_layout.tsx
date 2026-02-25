@@ -56,7 +56,15 @@ export default function RootLayout() {
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: '#0b1220' },
+            headerTintColor: '#f8fafc',
+            headerTitleStyle: { fontWeight: '700' },
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: AppBackgroundColor },
+          }}
+        >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} />
           <Stack.Screen
@@ -70,7 +78,7 @@ export default function RootLayout() {
           <Stack.Screen name="screens/PetHistoryScreen" options={{ title: 'Historial Médico' }} />
           <Stack.Screen name="screens/EditOwnerScreen" options={{ title: 'Editar propietario' }} />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style="light" translucent={false} backgroundColor="#0b1220" />
       </ThemeProvider>
     </AuthContext.Provider>
   );

@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { apiUrl } from '../../constants/api';
 import { AppBackgroundColor } from '../../constants/theme';
@@ -50,6 +51,7 @@ const initialForm: FormState = {
 
 export default function EditOwnerScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { token, user } = useAuth();
   const [propietario, setPropietario] = useState<Propietario | null>(null);
   const [form, setForm] = useState<FormState>(initialForm);
@@ -330,7 +332,10 @@ export default function EditOwnerScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top + 12, 24) }]}
+    >
       {renderContent()}
     </ScrollView>
   );

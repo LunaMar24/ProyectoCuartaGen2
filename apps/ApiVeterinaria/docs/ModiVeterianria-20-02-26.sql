@@ -65,7 +65,6 @@ CREATE TABLE cita_reservas (
     INDEX idx_reserva_mascota_fecha (mascotaId, fecha_inicio)
 );
 
-
 DELIMITER $$
 
 CREATE PROCEDURE sp_reservar_cita_temporal(
@@ -79,32 +78,39 @@ BEGIN
     DECLARE v_existe INT DEFAULT 0;
     DECLARE v_fecha_expiracion DATETIME;
 
+    -- Horario laboral configurable
     DECLARE v_hora_inicio TIME DEFAULT '09:00:00';
     DECLARE v_hora_fin TIME DEFAULT '17:00:00';
 
-    -- Aislamiento fuerte
     SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     START TRANSACTION;
 
-    -- Limpiar reservas expiradas
+    -- 1 Limpiar reservas expiradas
     DELETE FROM cita_reservas
     WHERE fecha_expiracion <= NOW();
 
-    -- Validar rango correcto
+    -- 2 Validar que la fecha sea futura
+    IF p_fecha_inicio <= NOW() THEN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se puede reservar una cita en una fecha u hora pasada';
+    END IF;
+
+    -- 3 Validar rango correcto
     IF p_fecha_inicio >= p_fecha_fin THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Rango de fecha inválido';
+        SET MESSAGE_TEXT = 'Rango inválido';
     END IF;
 
-    -- Validar que no cruce de día
+    -- 4 Validar que no cruce de día
     IF DATE(p_fecha_inicio) <> DATE(p_fecha_fin) THEN
         ROLLBACK;
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'No se permiten reservas que crucen de día';
     END IF;
 
-    -- Validar horario laboral
+    -- 5 Validar horario laboral
     IF TIME(p_fecha_inicio) < v_hora_inicio
        OR TIME(p_fecha_fin) > v_hora_fin THEN
         ROLLBACK;
@@ -112,7 +118,7 @@ BEGIN
         SET MESSAGE_TEXT = 'Fuera de horario laboral';
     END IF;
 
-    -- Validar que la mascota no tenga cita P o F ese día
+    -- 6 Validar que la mascota no tenga cita P o F ese día
     SELECT COUNT(*) INTO v_existe
     FROM citas
     WHERE estado IN ('P','F')
@@ -126,12 +132,12 @@ BEGIN
         SET MESSAGE_TEXT = 'La mascota ya tiene una cita ese día';
     END IF;
 
-    -- Eliminar cualquier reserva activa previa de la mascota
+    -- 7 Eliminar cualquier reserva activa previa de la mascota
     DELETE FROM cita_reservas
     WHERE mascotaId = p_mascotaId
       AND fecha_expiracion > NOW();
 
-    -- Validar solapamiento contra citas activas
+    -- 8 Validar solapamiento contra citas activas
     SELECT COUNT(*) INTO v_existe
     FROM citas
     WHERE estado IN ('P','F')
@@ -145,7 +151,7 @@ BEGIN
         SET MESSAGE_TEXT = 'Ya existe una cita en ese rango';
     END IF;
 
-    -- Validar solapamiento contra reservas activas
+    -- 9 Validar solapamiento contra reservas activas
     SELECT COUNT(*) INTO v_existe
     FROM cita_reservas
     WHERE fecha_expiracion > NOW()
@@ -159,10 +165,10 @@ BEGIN
         SET MESSAGE_TEXT = 'Ya existe una reserva activa en ese rango';
     END IF;
 
-    -- Calcular expiración
+    -- 10 Calcular expiración
     SET v_fecha_expiracion = DATE_ADD(NOW(), INTERVAL p_timeout_minutos MINUTE);
 
-    -- Insertar reserva
+    -- 11 Insertar nueva reserva
     INSERT INTO cita_reservas (
         mascotaId,
         usuarioId,
@@ -180,6 +186,7 @@ BEGIN
 
     COMMIT;
 
+    -- Devolver idReserva
     SELECT LAST_INSERT_ID() AS idReserva;
 
 END$$

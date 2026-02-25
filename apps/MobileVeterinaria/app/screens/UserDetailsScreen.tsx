@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { AppBackgroundColor } from '../../constants/theme';
 
 export default function UserDetailsScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const formatTipoUsuario = (value?: string) => {
     if (!value) return '-';
@@ -36,7 +38,7 @@ export default function UserDetailsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: Math.max(insets.top + 12, 24) }]}>
       <Text style={styles.title}>¡Bienvenid@ {user.nombre}!</Text>
       <Text style={styles.info}>Email: {user.email}</Text>
       <Text style={styles.info}>Teléfono: {user.telefono}</Text>

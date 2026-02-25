@@ -80,6 +80,13 @@ export default function CrearCitaMascotaPage() {
     now.setMilliseconds(0);
 
     const roundedMinute = Math.floor(now.getMinutes() / DEFAULT_DURATION_MINUTES) * DEFAULT_DURATION_MINUTES;
+    now.setMinutes(roundedMinute);
+
+    const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+    const lastAllowedStartMinutes = WORKING_HOUR_END * 60 - DEFAULT_DURATION_MINUTES;
+    if (currentTotalMinutes > lastAllowedStartMinutes) {
+      now.setDate(now.getDate() + 1);
+    }
 
     return {
       fechaInicioDate: toDateInputValue(now),
