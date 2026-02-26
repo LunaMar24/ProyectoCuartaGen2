@@ -139,3 +139,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 apps/ApiVeterinaria/docs/*.mwb.bak
 apps/ApiVeterinaria/docs/*.mwb.beforefix
+apps/MobileVeterinaria/package-lock.json
