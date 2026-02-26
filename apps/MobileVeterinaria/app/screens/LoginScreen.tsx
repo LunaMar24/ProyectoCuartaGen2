@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { apiUrl } from '../../constants/api';
@@ -14,6 +15,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const onChange = (name: string, value: string) => {
         setForm((f) => ({ ...f, [name]: value }));
@@ -70,14 +72,19 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                     value={form.email}
                     onChangeText={(v) => onChange('email', v)}
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Contraseña"
-                    placeholderTextColor="#94a3b8"
-                    secureTextEntry
-                    value={form.password}
-                    onChangeText={(v) => onChange('password', v)}
-                />
+                <View style={styles.passwordFieldWrap}>
+                    <TextInput
+                        style={[styles.input, styles.inputWithToggle]}
+                        placeholder="Contraseña"
+                        placeholderTextColor="#94a3b8"
+                        secureTextEntry={!showPassword}
+                        value={form.password}
+                        onChangeText={(v) => onChange('password', v)}
+                    />
+                    <TouchableOpacity style={styles.toggleButton} onPress={() => setShowPassword((prev) => !prev)}>
+                        <Feather name={showPassword ? 'eye' : 'eye-off'} size={18} color="#94a3b8" />
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity style={styles.button} onPress={onSubmit} disabled={loading}>
                     <Text style={styles.buttonText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
                 </TouchableOpacity>
@@ -141,6 +148,20 @@ const styles = StyleSheet.create({
         padding: 14,
         borderWidth: 1,
         borderColor: '#1e293b',
+    },
+    passwordFieldWrap: {
+        position: 'relative',
+    },
+    inputWithToggle: {
+        paddingRight: 52,
+    },
+    toggleButton: {
+        position: 'absolute',
+        right: 10,
+        top: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        paddingHorizontal: 8,
     },
     button: {
         backgroundColor: '#22d3ee',

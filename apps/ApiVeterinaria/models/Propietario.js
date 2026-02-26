@@ -14,6 +14,7 @@
 
 const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
+const { DEFAULT_CLIENT_PASSWORD } = require('../constants/security');
 
 class Propietario {
     /**
@@ -179,9 +180,8 @@ class Propietario {
     static async create(propData) {
         try {
             const { nombre, apellidos, cedula, telefono, correo } = propData;
-            const defaultPassword = 'Password@1';
             const saltRounds = 12;
-            const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+            const hashedPassword = await bcrypt.hash(DEFAULT_CLIENT_PASSWORD, saltRounds);
 
             const [spResult] = await pool.execute(
                 'CALL sp_crear_usuario_y_propietario(?, ?, ?, ?, ?, ?)',

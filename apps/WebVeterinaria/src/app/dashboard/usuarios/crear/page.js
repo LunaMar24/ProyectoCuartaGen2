@@ -12,6 +12,7 @@ export default function CrearUsuarioPage() {
   const [ok, setOk] = useState("");
   const [errorList, setErrorList] = useState([]); // lista de mensajes del backend
   const [fieldErrors, setFieldErrors] = useState({}); // errores por campo { email: [..], password:[..] }
+  const [showPassword, setShowPassword] = useState(false);
 
   // Validaciones simples en cliente para mejorar UX.
   const validateForm = (values) => {
@@ -161,15 +162,34 @@ export default function CrearUsuarioPage() {
         </div>
         <div>
           <label className="block text-sm text-slate-300 mb-1">Contraseña</label>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={onChange}
-            required
-            aria-invalid={fieldErrors.password ? "true" : "false"}
-            className={`w-full bg-slate-800 border rounded-md px-3 py-2 ${fieldErrors.password ? "border-red-500" : "border-slate-700"}`}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={form.password}
+              onChange={onChange}
+              required
+              aria-invalid={fieldErrors.password ? "true" : "false"}
+              className={`w-full bg-slate-800 border rounded-md px-3 py-2 pr-20 ${fieldErrors.password ? "border-red-500" : "border-slate-700"}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-2 flex items-center px-2 text-slate-300 hover:text-slate-100"
+              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 3C5 3 1.73 6.11.5 10c1.23 3.89 4.5 7 9.5 7s8.27-3.11 9.5-7C18.27 6.11 15 3 10 3zM10 15a5 5 0 110-10 5 5 0 010 10z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.58 10.58A3 3 0 0113.42 13.42" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.88 9.88A5 5 0 0119.92 12.42C18.69 16.31 15.42 19.42 10.42 19.42c-1.1 0-2.15-.18-3.12-.52" />
+                </svg>
+              )}
+            </button>
+          </div>
           {fieldErrors.password && (
             <p className="mt-1 text-xs text-rose-300">{fieldErrors.password[0]}</p>
           )}

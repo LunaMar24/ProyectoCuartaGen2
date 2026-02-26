@@ -4,6 +4,8 @@
  */
 
 const { pool } = require('../config/database');
+const bcrypt = require('bcryptjs');
+const { DEFAULT_CLIENT_PASSWORD } = require('../constants/security');
 
 /**
  * Clase que representa el modelo de Usuario
@@ -259,6 +261,46 @@ class User {
         } catch (error) {
             console.error('Error en User.findByEmailWithPassword:', error);
             throw new Error('Error al buscar usuario por email');
+        }
+    }
+
+    /**
+     * Busca un usuario por ID para autenticación/validación (incluye password)
+     * @param {number} id - ID del usuario
+     * @returns {Promise<Object|null>} Usuario encontrado con password o null
+     */
+    static async findByIdWithPassword(id) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT id, nombre, email, telefono, tipo_usuario AS tipo_Usuario, password, fecha_creacion, fecha_actualizacion FROM usuarios WHERE id = ?',
+                [id]
+            );
+            return rows.length > 0 ? rows[0] : null;
+        } catch (error) {
+            console.error('Error en User.findByIdWithPassword:', error);
+            throw new Error('Error al buscar usuario por ID');
+        }
+    }
+
+    /**
+     * Resetea la contraseña de un usuario al valor por defecto del sistema
+     * @param {number} id - ID del usuario
+     * @returns {Promise<boolean>} true si se actualizó correctamente
+     */
+    static async resetPasswordToDefault(id) {
+        try {
+            const saltRounds = 12;
+            const hashedPassword = await bcrypt.hash(DEFAULT_CLIENT_PASSWORD, saltRounds);
+
+            const [result] = await pool.execute(
+                'UPDATE usuarios SET password = ?, fecha_actualizacion = NOW() WHERE id = ?',
+                [hashedPassword, id]
+            );
+
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error en User.resetPasswordToDefault:', error);
+            throw new Error('Error al resetear contraseña del usuario');
         }
     }
 
