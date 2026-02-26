@@ -106,6 +106,7 @@ export default function DashboardLayout({ children }) {
       { href: "/dashboard/usuarios", label: "Usuarios" },
       { href: "/dashboard/propietarios", label: "Propietarios" },
       { href: "/dashboard/mascotas", label: "Mascotas" },
+      { href: "/dashboard/citas", label: "Control Citas" },
     ],
     []
   );
@@ -119,6 +120,7 @@ export default function DashboardLayout({ children }) {
       usuarios: "Usuarios",
       propietarios: "Propietarios",
       mascotas: "Mascotas",
+      citas: "Control Citas",
       historiales: "Historiales",
       profile: "Perfil",
       "": "Panel",

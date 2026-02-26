@@ -13,8 +13,86 @@
  */
 
 const { pool } = require('../config/database');
+const bcrypt = require('bcryptjs');
 
 class Propietario {
+    /**
+     * Crea un error de aplicación con metadatos HTTP
+     * @param {string} message - Mensaje de error
+     * @param {number} status - Código HTTP sugerido
+     * @param {string} code - Código interno de error
+     * @returns {Error}
+     */
+    static buildAppError(message, status, code) {
+        const appError = new Error(message);
+        appError.status = status;
+        appError.code = code;
+        return appError;
+    }
+
+    /**
+     * Mapea errores SIGNAL (SQLSTATE 45000) de SP a errores de aplicación
+     * @param {Object} error - Error original de mysql2
+     * @returns {Error|null}
+     */
+    static mapStoredProcedureError(error) {
+        const isSignalError = error && (error.code === 'ER_SIGNAL_EXCEPTION' || error.sqlState === '45000');
+        if (!isSignalError) return null;
+
+        const signalMessage = (error.sqlMessage || error.message || '').trim();
+
+        const mappedErrors = {
+            'El correo ya está registrado en usuarios': { status: 409, code: 'EMAIL_ALREADY_EXISTS_USERS' },
+            'El correo ya está registrado en propietarios': { status: 409, code: 'EMAIL_ALREADY_EXISTS_PROPIETARIOS' },
+            'La cédula ya está registrada': { status: 409, code: 'CEDULA_ALREADY_EXISTS' },
+            'El propietario no existe': { status: 404, code: 'PROPIETARIO_NOT_FOUND' }
+        };
+
+        const mapped = mappedErrors[signalMessage];
+        if (mapped) {
+            return this.buildAppError(signalMessage, mapped.status, mapped.code);
+        }
+
+        return this.buildAppError(
+            signalMessage || 'Error de validación en procedimiento almacenado',
+            400,
+            'SP_VALIDATION_ERROR'
+        );
+    }
+
+    /**
+     * Extrae el id del propietario desde el resultado de un CALL a SP
+     * @param {any} spResult - Resultado devuelto por mysql2 para el SP
+     * @returns {number|null}
+     */
+    static extractPropietarioIdFromSpResult(spResult) {
+        const candidateKeys = ['idPropietario', 'id_propietario', 'propietarioId', 'id'];
+
+        const toValidId = (value) => {
+            const parsed = Number(value);
+            return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+        };
+
+        if (Array.isArray(spResult)) {
+            for (const item of spResult) {
+                const id = this.extractPropietarioIdFromSpResult(item);
+                if (id) return id;
+            }
+            return null;
+        }
+
+        if (spResult && typeof spResult === 'object') {
+            for (const key of candidateKeys) {
+                if (Object.prototype.hasOwnProperty.call(spResult, key)) {
+                    const id = toValidId(spResult[key]);
+                    if (id) return id;
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Constructor para crear una instancia de Propietario
      * @param {Object} propData - Datos del propietario
@@ -24,6 +102,7 @@ class Propietario {
      * @param {string} propData.cedula - Cédula
      * @param {string} propData.telefono - Teléfono
      * @param {string} propData.correo - Correo electrónico
+     * @param {number} propData.usuarioId - ID del usuario relacionado
      */
     constructor(propData) {
         this.id = propData.id;
@@ -32,6 +111,7 @@ class Propietario {
         this.cedula = propData.cedula;
         this.telefono = propData.telefono;
         this.correo = propData.correo;
+            this.usuarioId = propData.usuarioId;
     }
 
     /**
@@ -41,7 +121,7 @@ class Propietario {
     static async findAll() {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario ORDER BY Nombre'
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario ORDER BY Nombre'
             );
             return rows;
         } catch (error) {
@@ -58,13 +138,31 @@ class Propietario {
     static async findById(id) {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario WHERE idPropietario = ?',
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE idPropietario = ?',
                 [id]
             );
             return rows.length > 0 ? rows[0] : null;
         } catch (error) {
             console.error('Error en Propietario.findById:', error);
             throw new Error('Error al buscar propietario por ID');
+        }
+    }
+
+    /**
+     * Busca un propietario por su usuarioId
+     * @param {number} usuarioId - ID del usuario asociado
+     * @returns {Promise<Object|null>} Propietario encontrado o null
+     */
+    static async findByUsuarioId(usuarioId) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE usuarioId = ?',
+                [usuarioId]
+            );
+            return rows.length > 0 ? rows[0] : null;
+        } catch (error) {
+            console.error('Error en Propietario.findByUsuarioId:', error);
+            throw new Error('Error al buscar propietario por usuarioId');
         }
     }
 
@@ -81,17 +179,30 @@ class Propietario {
     static async create(propData) {
         try {
             const { nombre, apellidos, cedula, telefono, correo } = propData;
-            const [result] = await pool.execute(
-                'INSERT INTO propietario (Nombre, Apellidos, Cedula, Telefono, Correo) VALUES (?, ?, ?, ?, ?)',
-                [nombre, apellidos, cedula, telefono, correo]
+            const defaultPassword = 'Password@1';
+            const saltRounds = 12;
+            const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+
+            const [spResult] = await pool.execute(
+                'CALL sp_crear_usuario_y_propietario(?, ?, ?, ?, ?, ?)',
+                [nombre, apellidos, cedula, correo, telefono, hashedPassword]
             );
 
-            const newProp = await this.findById(result.insertId);
+            const propietarioId = this.extractPropietarioIdFromSpResult(spResult);
+            if (!propietarioId) {
+                throw new Error('No se recibió el id del propietario creado desde el SP');
+            }
+
+            const newProp = await this.findById(propietarioId);
             return newProp;
         } catch (error) {
             console.error('Error en Propietario.create:', error);
+            const spError = this.mapStoredProcedureError(error);
+            if (spError) {
+                throw spError;
+            }
             if (error.code === 'ER_DUP_ENTRY') {
-                throw new Error('Entrada duplicada');
+                throw this.buildAppError('Entrada duplicada', 409, 'DUPLICATE_ENTRY');
             }
             throw new Error('Error al crear propietario');
         }
@@ -105,10 +216,10 @@ class Propietario {
      */
     static async update(id, propData) {
         try {
-            const { nombre, apellidos, cedula, telefono, correo } = propData;
+            const { nombre, apellidos, cedula, telefono, correo, usuarioId } = propData;
 
-            let query = 'UPDATE propietario SET Nombre = ?, Apellidos = ?, Cedula = ?, Telefono = ?, Correo = ? WHERE idPropietario = ?';
-            const params = [nombre, apellidos, cedula, telefono, correo, id];
+            let query = 'UPDATE propietario SET Nombre = ?, Apellidos = ?, Cedula = ?, Telefono = ?, Correo = ?, usuarioId = ? WHERE idPropietario = ?';
+            const params = [nombre, apellidos, cedula, telefono, correo, usuarioId, id];
 
             const [result] = await pool.execute(query, params);
 
@@ -134,13 +245,14 @@ class Propietario {
      */
     static async delete(id) {
         try {
-            const [result] = await pool.execute(
-                'DELETE FROM propietario WHERE idPropietario = ?',
-                [id]
-            );
-            return result.affectedRows > 0;
+            await pool.execute('CALL sp_eliminar_propietario(?)', [id]);
+            return true;
         } catch (error) {
             console.error('Error en Propietario.delete:', error);
+            const spError = this.mapStoredProcedureError(error);
+            if (spError) {
+                throw spError;
+            }
             throw new Error('Error al eliminar propietario');
         }
     }
@@ -153,7 +265,7 @@ class Propietario {
     static async searchByName(nombre) {
         try {
             const [rows] = await pool.execute(
-                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario WHERE Nombre LIKE ? OR Apellidos LIKE ? ORDER BY Nombre',
+                'SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario WHERE Nombre LIKE ? OR Apellidos LIKE ? ORDER BY Nombre',
                 [`%${nombre}%`, `%${nombre}%`]
             );
             return rows;
@@ -170,18 +282,19 @@ class Propietario {
      */
     static async searchByFields(searchFields) {
         try {
-            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo'];
+            const validFields = ['nombre', 'apellidos', 'cedula', 'telefono', 'correo', 'usuarioId'];
             const fieldMappings = {
                 'nombre': 'Nombre',
                 'apellidos': 'Apellidos', 
                 'cedula': 'Cedula',
                 'telefono': 'Telefono',
-                'correo': 'Correo'
+                'correo': 'Correo',
+                'usuarioId': 'usuarioId'
             };
 
             // Campos de texto (búsqueda parcial) vs campos exactos
             const textFields = ['nombre', 'apellidos', 'correo', 'cedula', 'telefono'];
-            const exactFields = [];
+            const exactFields = ['usuarioId'];
 
             const conditions = [];
             const params = [];
@@ -210,7 +323,7 @@ class Propietario {
             const whereClause = conditions.join(' AND ');
             const query = `
                 SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, 
-                       Cedula as cedula, Telefono as telefono, Correo as correo 
+                       Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId 
                 FROM propietario 
                 WHERE ${whereClause} 
                 ORDER BY Nombre, Apellidos
@@ -255,7 +368,7 @@ class Propietario {
             if (limitInt > 100) limitInt = 100;
 
             const [props] = await pool.execute(
-                `SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo FROM propietario ORDER BY Nombre LIMIT ${limitInt} OFFSET ${offset}`
+                `SELECT idPropietario as id, Nombre as nombre, Apellidos as apellidos, Cedula as cedula, Telefono as telefono, Correo as correo, usuarioId as usuarioId FROM propietario ORDER BY Nombre LIMIT ${limitInt} OFFSET ${offset}`
             );
 
             const total = await this.count();

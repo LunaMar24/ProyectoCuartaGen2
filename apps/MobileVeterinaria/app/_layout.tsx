@@ -6,20 +6,15 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AppBackgroundColor } from '@/constants/theme';
 import { AuthContext, User } from '../context/AuthContext';
-import { Redirect } from 'expo-router';
 import LoginScreen from './screens/LoginScreen';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [checking, setChecking] = useState(true);
-  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -61,11 +56,29 @@ export default function RootLayout() {
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: '#0b1220' },
+            headerTintColor: '#f8fafc',
+            headerTitleStyle: { fontWeight: '700' },
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: AppBackgroundColor },
+          }}
+        >
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UserDetailsScreen" options={{ title: 'Detalles del Usuario' }} />
+          <Stack.Screen
+            name="screens/OwnerProfileScreen"
+            options={{
+              title: 'Propietario',
+            }}
+          />
+          <Stack.Screen name="screens/OwnerPetsScreen" options={{ title: 'Mis mascotas' }} />
+          <Stack.Screen name="screens/PetAppointmentScreen" options={{ title: 'Crear cita' }} />
+          <Stack.Screen name="screens/PetHistoryScreen" options={{ title: 'Historial Médico' }} />
+          <Stack.Screen name="screens/EditOwnerScreen" options={{ title: 'Editar propietario' }} />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style="light" translucent={false} backgroundColor="#0b1220" />
       </ThemeProvider>
     </AuthContext.Provider>
   );
@@ -74,7 +87,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: AppBackgroundColor,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,

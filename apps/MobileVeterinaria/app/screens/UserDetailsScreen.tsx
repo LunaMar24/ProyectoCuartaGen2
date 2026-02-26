@@ -1,9 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { AppBackgroundColor } from '../../constants/theme';
 
 export default function UserDetailsScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const formatTipoUsuario = (value?: string) => {
     if (!value) return '-';
@@ -25,13 +30,15 @@ export default function UserDetailsScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Error</Text>
         <Text style={styles.info}>No se encontraron los detalles del usuario.</Text>
-        <Button title="Cerrar sesión" onPress={logout} color="#f43f5e" />
+        <TouchableOpacity style={[styles.buttonBase, styles.dangerButton]} onPress={logout}>
+          <Text style={styles.buttonLabel}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: Math.max(insets.top + 12, 24) }]}>
       <Text style={styles.title}>¡Bienvenid@ {user.nombre}!</Text>
       <Text style={styles.info}>Email: {user.email}</Text>
       <Text style={styles.info}>Teléfono: {user.telefono}</Text>
@@ -49,7 +56,24 @@ export default function UserDetailsScreen() {
       <Text style={styles.info}>
         Última Actualización: {new Date(user.fecha_actualizacion).toLocaleDateString()}
       </Text>
-      <Button title="Cerrar sesión" onPress={logout} color="#f43f5e" />
+
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.buttonBase, styles.primaryButton]}
+          onPress={() => router.push('/screens/OwnerProfileScreen')}
+        >
+          <Text style={styles.buttonLabel}>Información del propietario</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.buttonBase, styles.secondaryButton]}
+          onPress={() => router.push('/screens/OwnerPetsScreen')}
+        >
+          <Text style={styles.buttonLabel}>Mascotas</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.buttonBase, styles.dangerButton]} onPress={logout}>
+          <Text style={styles.buttonLabel}>Cerrar sesión</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -58,7 +82,7 @@ export default function UserDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#18181b',
+    backgroundColor: AppBackgroundColor,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
@@ -99,5 +123,30 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 999,
     marginRight: 6,
+  },
+  actions: {
+    width: '100%',
+    marginTop: 16,
+    gap: 12,
+  },
+  buttonBase: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#22d3ee',
+  },
+  secondaryButton: {
+    backgroundColor: '#5bc478',
+  },
+  dangerButton: {
+    backgroundColor: '#f43f5e',
+  },
+  buttonLabel: {
+    color: '#f8fafc',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

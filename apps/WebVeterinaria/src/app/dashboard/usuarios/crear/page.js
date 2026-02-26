@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, getApiErrorMessage } from "@/lib/api";
 
 export default function CrearUsuarioPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", password: "", tipo_Usuario: "C" });
+  const [form, setForm] = useState({ nombre: "", email: "", telefono: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
@@ -43,11 +43,6 @@ export default function CrearUsuarioPage() {
       el.push("La contraseña debe tener al menos 8 caracteres.");
     }
 
-    if (!values.tipo_Usuario || !["A", "C"].includes(values.tipo_Usuario)) {
-      fe.tipo_Usuario = ["El tipo de usuario es requerido."];
-      el.push("El tipo de usuario es requerido.");
-    }
-
     return { ok: Object.keys(fe).length === 0, fe, el };
   };
 
@@ -74,15 +69,14 @@ export default function CrearUsuarioPage() {
       const res = await fetch(apiUrl("/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, tipo_Usuario: "A" }),
       });
       const data = await res.json().catch(() => ({}));
       if (data?.success) {
         setOk("Usuario creado correctamente");
         setTimeout(() => router.push("/dashboard/usuarios"), 800);
       } else {
-        const serverMsg = data?.msg || data?.message;
-        setError(serverMsg ? `No se pudo crear el usuario: ${serverMsg}` : "No se pudo crear el usuario");
+        setError(getApiErrorMessage(data, "No se pudo crear el usuario"));
         // Procesar arreglo de errores si existe
         const arr = Array.isArray(data?.errors) ? data.errors : [];
         if (arr.length) {
@@ -180,24 +174,6 @@ export default function CrearUsuarioPage() {
             <p className="mt-1 text-xs text-rose-300">{fieldErrors.password[0]}</p>
           )}
         </div>
-        <div>
-          <label className="block text-sm text-slate-300 mb-1">Tipo de usuario</label>
-          <select
-            name="tipo_Usuario"
-            value={form.tipo_Usuario}
-            onChange={onChange}
-            required
-            aria-invalid={fieldErrors.tipo_Usuario ? "true" : "false"}
-            className={`w-full bg-slate-800 border rounded-md px-3 py-2 ${fieldErrors.tipo_Usuario ? "border-red-500" : "border-slate-700"}`}
-          >
-            <option value="A">Administrador</option>
-            <option value="C">Cliente</option>
-          </select>
-          {fieldErrors.tipo_Usuario && (
-            <p className="mt-1 text-xs text-rose-300">{fieldErrors.tipo_Usuario[0]}</p>
-          )}
-        </div>
-
         <div className="pt-2 flex items-center gap-2">
           <button
             type="button"

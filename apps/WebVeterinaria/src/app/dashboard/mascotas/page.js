@@ -153,6 +153,14 @@ export default function MascotasPage() {
                   <td className="px-4 py-2">{propName}</td>
                   <td className="px-4 py-2">
                     <div className="flex justify-end gap-2">
+                      {/* Crear cita */}
+                      <Link href={`/dashboard/mascotas/${id}/cita`} title="Crear cita"
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-700/60 text-emerald-300 hover:text-emerald-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 2v4m8-4v4M3 10h18M6 6h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 13v4m-2-2h4" />
+                        </svg>
+                      </Link>
                       {/* Historial */}
                       <Link href={`/dashboard/mascotas/${id}/historial`} title="Historial"
                             onClick={() => { if (typeof window !== "undefined") { localStorage.setItem("lastMascotasURL", "/dashboard/mascotas"); } }}

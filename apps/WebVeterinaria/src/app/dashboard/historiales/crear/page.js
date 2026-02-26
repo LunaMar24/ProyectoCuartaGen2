@@ -8,8 +8,26 @@ function CrearHistorialPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMascota = searchParams?.get("mascota") || "";
+  const initialCitaId = searchParams?.get("idCita") || "";
+  const initialMotivo = searchParams?.get("motivo") || "";
   const mascotaLocked = useMemo(() => String(initialMascota).trim() !== "", [initialMascota]);
-  const [form, setForm] = useState({ mascota: "", fechaAtencion: "", motivo: "", diagnostico: "" });
+  const getCurrentDateTimeLocal = () => {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    const hh = pad(now.getHours());
+    const mi = pad(now.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  };
+
+  const [form, setForm] = useState({
+    mascota: "",
+    fechaAtencion: getCurrentDateTimeLocal(),
+    motivo: initialMotivo,
+    diagnostico: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
@@ -64,6 +82,7 @@ function CrearHistorialPageContent() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           mascota: idToSend,
+          idCita: initialCitaId ? Number(initialCitaId) : undefined,
           fechaAtencion: toIsoFromDateTimeLocal(form.fechaAtencion),
           motivo: form.motivo.trim(),
           diagnostico: form.diagnostico.trim(),
@@ -73,6 +92,10 @@ function CrearHistorialPageContent() {
       if (data?.success) {
         setOk("Historial creado correctamente");
         setTimeout(() => {
+          if (initialCitaId) {
+            router.push("/dashboard/citas");
+            return;
+          }
           if (idToSend) router.push(`/dashboard/historiales?mascota=${idToSend}`);
           else router.push("/dashboard/historiales");
         }, 800);
@@ -142,6 +165,10 @@ function CrearHistorialPageContent() {
 
         <div className="sm:col-span-2 pt-2 flex items-center gap-2">
           <button type="button" onClick={() => {
+            if (initialCitaId) {
+              router.push("/dashboard/citas");
+              return;
+            }
             const id = extractMascotaId(initialMascota);
             if (Number.isFinite(id) && id > 0) router.push(`/dashboard/historiales?mascota=${id}`);
             else router.push("/dashboard/historiales");

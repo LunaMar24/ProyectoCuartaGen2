@@ -156,6 +156,12 @@ class Mascota {
                 const str = value.toString().trim();
                 if (!str) continue;
 
+                if (field === 'propietario' && /^\d+$/.test(str)) {
+                    conditions.push('idMascota IN (SELECT idMascota FROM mascota WHERE Propietario = ?)');
+                    params.push(Number(str));
+                    continue;
+                }
+
                 const dbField = fieldMappings[field];
                 if (textFields.includes(field)) {
                     conditions.push(`${dbField} LIKE ?`);

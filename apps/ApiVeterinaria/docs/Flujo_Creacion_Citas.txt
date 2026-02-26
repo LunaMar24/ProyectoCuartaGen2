@@ -1,0 +1,108 @@
+FLUJO COMPLETO PARA CREACIÓN DE CITA Sistema de Gestión Veterinaria
+=================================
+
+ARQUITECTURA GENERAL
+
+La creación de una cita tiene 2 fases obligatorias:
+
+1)  Reserva temporal del espacio
+2)  Confirmación de reserva → creación definitiva de la cita
+
+Nunca se crea una cita directamente.
+
+------------------------------------------------------------------------
+
+FASE 1 — RESERVA TEMPORAL
+
+Objetivo: Bloquear el espacio para evitar solapamientos mientras el
+usuario completa el proceso.
+
+Endpoint sugerido: POST /citas/reservar
+
+Parámetros: - usuarioId - mascotaId - fechaInicio (datetime) - fechaFin
+(datetime) - timeoutMinutos
+
+Ejemplo: { “usuarioId”: 12, “mascotaId”: 5, “fechaInicio”: “2026-03-10
+10:00:00”, “fechaFin”: “2026-03-10 10:30:00”, “timeoutMinutos”: 10 }
+
+SP ejecutado: sp_reservar_cita_temporal
+
+Validaciones que realiza el SP: - Limpia reservas expiradas - No cruce
+de día - Dentro de horario laboral - No solapamiento con citas (P, F) -
+No solapamiento con reservas activas - Mascota no tenga cita ese día -
+Mascota no tenga reserva activa ese día - Transacción SERIALIZABLE
+
+Respuesta exitosa: { “success”: true, “idReserva”: 48 }
+
+Si falla: { “success”: false, “message”: “Ya existe una cita en ese
+rango” }
+
+La aplicación debe iniciar un temporizador visual con el timeout. Si no
+confirma antes del tiempo, la reserva expirará automáticamente.
+
+------------------------------------------------------------------------
+
+FASE 2 — CONFIRMAR RESERVA Y CREAR CITA
+
+Objetivo: Convertir la reserva en cita real en una sola operación
+atómica.
+
+Endpoint sugerido: POST /citas/confirmar
+
+Parámetros: - idReserva - usuarioId - motivo - notas
+
+Ejemplo: { “idReserva”: 48, “usuarioId”: 12, “motivo”: “Consulta
+general”, “notas”: “La mascota presenta síntomas de alergia” }
+
+SP ejecutado: sp_confirmar_reserva_y_crear_cita
+
+Acciones del SP: - SERIALIZABLE - Verifica que la reserva exista -
+Verifica que no esté expirada - Inserta cita con estado ‘P’ - Elimina
+reserva - COMMIT - Devuelve idCita
+
+Respuesta exitosa: { “success”: true, “idCita”: 102 }
+
+Si la reserva expiró: { “success”: false, “message”: “La reserva ha
+expirado” }
+
+La aplicación debe mostrar mensaje y regresar al calendario.
+
+------------------------------------------------------------------------
+
+FLUJO EN LA APLICACIÓN
+
+1)  Usuario selecciona fecha y hora
+2)  App llama a /citas/reservar
+3)  Si success:
+    -   Guarda idReserva
+    -   Inicia contador visual
+4)  Usuario confirma
+5)  App llama a /citas/confirmar
+6)  Si success:
+    -   Mostrar confirmación
+    -   Redirigir a lista de citas
+
+------------------------------------------------------------------------
+
+MANEJO DE ERRORES IMPORTANTES
+
+Caso A: Reserva expira antes de confirmar → Mostrar mensaje → Volver a
+calendario
+
+Caso B: Otro usuario tomó el espacio → SP bloqueará en fase 1 → Mostrar
+mensaje
+
+Caso C: Usuario intenta confirmar dos veces → SP fallará porque reserva
+ya no existe
+
+------------------------------------------------------------------------
+
+REGLAS DE NEGOCIO PROTEGIDAS
+
+✔ No doble reserva ✔ No doble cita ✔ Sin race conditions ✔ Sin
+solapamientos ✔ Cancelaciones controladas ✔ Expiraciones automáticas ✔
+Concurrencia fuerte con SERIALIZABLE
+
+------------------------------------------------------------------------
+
+FIN DEL DOCUMENTO

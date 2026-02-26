@@ -30,8 +30,8 @@ class AuthController {
                 });
             }
 
-            const { nombre, email, telefono, password, tipo_Usuario } = req.body;
-            const normalizedTipo = (tipo_Usuario || 'C').toString().trim().toUpperCase();
+            const { nombre, email, telefono, password } = req.body;
+            const normalizedTipo = 'A';
 
             // Verificar si el email ya existe
             const existingUser = await User.findByEmail(email);
@@ -76,10 +76,11 @@ class AuthController {
             });
         } catch (error) {
             console.error('Error en register:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }
@@ -269,10 +270,11 @@ class AuthController {
             });
         } catch (error) {
             console.error('Error en updateProfile:', error);
-            res.status(500).json({
+            const status = error.status || 500;
+            res.status(status).json({
                 success: false,
-                message: 'Error interno del servidor',
-                error: error.message
+                message: error.message || 'Error interno del servidor',
+                code: error.code
             });
         }
     }

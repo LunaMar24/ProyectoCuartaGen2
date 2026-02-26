@@ -3,7 +3,7 @@
  * @description Contiene todas las validaciones para las rutas de usuarios
  */
 
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 /**
  * Validaciones para los datos de usuario
@@ -453,7 +453,12 @@ const validateHistorial = [
         .trim()
         .optional()
         .isLength({ max: 2000 })
-        .withMessage('El diagnóstico no puede exceder 2000 caracteres')
+        .withMessage('El diagnóstico no puede exceder 2000 caracteres'),
+
+    body('idCita')
+        .optional({ nullable: true })
+        .isInt({ min: 1 })
+        .withMessage('El idCita debe ser un ID numérico válido')
 ];
 
 const validateHistorialId = [
@@ -461,6 +466,105 @@ const validateHistorialId = [
         .isInt({ min: 1 })
         .withMessage('El ID debe ser un número entero positivo')
 ];
+
+/**
+ * Validaciones para reservar cita temporal
+ * Campos: mascotaId, fechaInicio, fechaFin, timeoutMinutos
+ */
+const validateCitaReserva = [
+    body('mascotaId')
+        .notEmpty()
+        .withMessage('La mascota es requerida')
+        .isInt({ min: 1 })
+        .withMessage('La mascota debe ser un ID numérico válido'),
+
+    body('fechaInicio')
+        .notEmpty()
+        .withMessage('La fecha de inicio es requerida')
+        .isISO8601()
+        .withMessage('La fecha de inicio debe ser un datetime ISO 8601'),
+
+    body('fechaFin')
+        .notEmpty()
+        .withMessage('La fecha de fin es requerida')
+        .isISO8601()
+        .withMessage('La fecha de fin debe ser un datetime ISO 8601'),
+
+    body('timeoutMinutos')
+        .notEmpty()
+        .withMessage('El timeout en minutos es requerido')
+        .isInt({ min: 1, max: 120 })
+        .withMessage('El timeout debe ser un número entre 1 y 120 minutos')
+];
+
+/**
+ * Validaciones para confirmar una reserva y crear cita
+ * Campos: idReserva, motivo, notas
+ */
+const validateCitaConfirmacion = [
+    body('idReserva')
+        .notEmpty()
+        .withMessage('El id de reserva es requerido')
+        .isInt({ min: 1 })
+        .withMessage('El id de reserva debe ser un número entero positivo'),
+
+    body('motivo')
+        .trim()
+        .notEmpty()
+        .withMessage('El motivo es requerido')
+        .isLength({ min: 1, max: 255 })
+        .withMessage('El motivo debe tener entre 1 y 255 caracteres'),
+
+    body('notas')
+        .optional()
+        .trim()
+        .isLength({ max: 2000 })
+        .withMessage('Las notas no pueden exceder 2000 caracteres')
+];
+
+    const validateCitaId = [
+        param('id')
+        .isInt({ min: 1 })
+        .withMessage('El ID de cita debe ser un número entero positivo')
+    ];
+
+    const validateReservaId = [
+        param('idReserva')
+            .isInt({ min: 1 })
+            .withMessage('El ID de reserva debe ser un número entero positivo')
+    ];
+
+    const validateCitaListQuery = [
+        query('fechaDesde')
+            .optional()
+            .isISO8601()
+            .withMessage('fechaDesde debe ser un datetime ISO 8601'),
+
+        query('fechaHasta')
+            .optional()
+            .isISO8601()
+            .withMessage('fechaHasta debe ser un datetime ISO 8601'),
+
+        query('estado')
+            .optional()
+            .matches(/^[A-Za-z](,[A-Za-z])*$/)
+            .withMessage('estado debe contener uno o más códigos de estado separados por coma (ej: P,F,C)'),
+
+        query('mascotaId')
+            .optional()
+            .isInt({ min: 1 })
+            .withMessage('mascotaId debe ser un número entero positivo'),
+
+        query('page')
+            .optional()
+            .isInt({ min: 1 })
+            .withMessage('page debe ser un número entero positivo'),
+
+        query('limit')
+            .optional()
+            .isInt({ min: 1, max: 100 })
+            .withMessage('limit debe ser un número entre 1 y 100')
+    ];
 
 module.exports = {
     validateUser,
@@ -480,5 +584,10 @@ module.exports = {
     validateMascota,
     validateMascotaId,
     validateHistorial,
-    validateHistorialId
+    validateHistorialId,
+    validateCitaReserva,
+    validateCitaConfirmacion,
+    validateCitaId,
+    validateCitaListQuery,
+    validateReservaId
 };

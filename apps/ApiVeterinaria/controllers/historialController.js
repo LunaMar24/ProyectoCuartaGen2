@@ -90,18 +90,34 @@ class HistorialController {
         }
     }
 
+    static async getHistorialByCitaId(req, res) {
+        try {
+            const { idCita } = req.params;
+            if (isNaN(idCita)) return res.status(400).json({ success: false, message: 'El idCita debe ser un número válido' });
+
+            const rec = await Historial.findByCitaId(idCita);
+            if (!rec) return res.status(404).json({ success: false, message: 'No existe historial asociado a la cita' });
+
+            res.status(200).json({ success: true, message: 'Historial asociado obtenido correctamente', data: rec });
+        } catch (error) {
+            console.error('Error en getHistorialByCitaId:', error);
+            res.status(500).json({ success: false, message: 'Error interno del servidor', error: error.message });
+        }
+    }
+
     static async createHistorial(req, res) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) return res.status(400).json({ success: false, message: 'Errores de validación', errors: errors.array() });
 
-            const { mascota, fechaAtencion, motivo, diagnostico } = req.body;
-            const newRec = await Historial.create({ mascota, fechaAtencion, motivo, diagnostico });
+            const { mascota, fechaAtencion, motivo, diagnostico, idCita } = req.body;
+            const usuarioId = req.user?.userId;
+            const newRec = await Historial.create({ mascota, fechaAtencion, motivo, diagnostico, idCita, usuarioId });
 
             res.status(201).json({ success: true, message: 'Historial creado correctamente', data: newRec });
         } catch (error) {
             console.error('Error en createHistorial:', error);
-            res.status(500).json({ success: false, message: 'Error interno del servidor', error: error.message });
+            res.status(error.status || 500).json({ success: false, message: error.message || 'Error interno del servidor', code: error.code });
         }
     }
 

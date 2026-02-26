@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { apiUrl } from '../../constants/api';
+import { AppBackgroundColor } from '../../constants/theme';
 
 type LoginScreenProps = {
     onLogin: (token: string, user: any) => void;
@@ -38,7 +39,6 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 const { tipo_usuario, tipoUsuario: tipoUsuarioLegacy, ...restUser } = rawUser;
                 const normalizedUser = { ...restUser, tipo_Usuario: tipoUsuario };
                 await AsyncStorage.setItem('authToken', data.data.token);
-                await AsyncStorage.setItem('authToken', data.data.token);
                 await AsyncStorage.setItem('authUser', JSON.stringify(normalizedUser));
                 onLogin(data.data.token, normalizedUser);
                 router.replace('/screens/UserDetailsScreen');
@@ -54,26 +54,34 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Iniciar sesión</Text>
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={form.email}
-                onChangeText={(v) => onChange('email', v)}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                secureTextEntry
-                value={form.password}
-                onChangeText={(v) => onChange('password', v)}
-            />
-            <TouchableOpacity style={styles.button} onPress={onSubmit} disabled={loading}>
-                <Text style={styles.buttonText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
-            </TouchableOpacity>
+            <View style={styles.brand}>
+                <Text style={styles.brandTitle}>VETERINARIA</Text>
+                <Text style={styles.brandSubtitle}>LunaMar</Text>
+            </View>
+            <View style={styles.form}>
+                <Text style={styles.title}>Iniciar sesión</Text>
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor="#94a3b8"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    value={form.email}
+                    onChangeText={(v) => onChange('email', v)}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Contraseña"
+                    placeholderTextColor="#94a3b8"
+                    secureTextEntry
+                    value={form.password}
+                    onChangeText={(v) => onChange('password', v)}
+                />
+                <TouchableOpacity style={styles.button} onPress={onSubmit} disabled={loading}>
+                    <Text style={styles.buttonText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -81,43 +89,75 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#18181b',
+        backgroundColor: AppBackgroundColor,
         alignItems: 'center',
         justifyContent: 'center',
+        paddingHorizontal: 24,
+    },
+    form: {
+        width: '100%',
+        backgroundColor: '#0f172a',
+        borderRadius: 28,
+        borderWidth: 1,
+        borderColor: '#1f2937',
         padding: 24,
+        gap: 12,
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        shadowOffset: { width: 0, height: 12 },
+        elevation: 10,
+    },
+    brand: {
+        position: 'absolute',
+        top: 168,
+        left: 24,
+        right: 24,
+        alignItems: 'center',
+    },
+    brandTitle: {
+        color: '#22d3ee',
+        fontSize: 34,
+        fontWeight: '800',
+        letterSpacing: 4,
+    },
+    brandSubtitle: {
+        color: '#22d3ee',
+        fontSize: 18,
+        marginTop: 4,
+        letterSpacing: 2,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 24,
+        color: '#f8fafc',
+        marginBottom: 4,
     },
     input: {
         width: '100%',
-        backgroundColor: '#27272a',
-        color: '#fff',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 12,
+        backgroundColor: '#111c2e',
+        color: '#f8fafc',
+        borderRadius: 16,
+        padding: 14,
         borderWidth: 1,
-        borderColor: '#52525b',
+        borderColor: '#1e293b',
     },
     button: {
-        backgroundColor: '#10b981',
-        borderRadius: 8,
-        paddingVertical: 12,
+        backgroundColor: '#22d3ee',
+        borderRadius: 999,
+        paddingVertical: 14,
         paddingHorizontal: 32,
         alignItems: 'center',
-        marginTop: 8,
+        marginTop: 6,
     },
     buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+        color: '#02101b',
+        fontWeight: '600',
         fontSize: 16,
     },
     error: {
-        color: '#f43f5e',
-        marginBottom: 12,
+        color: '#f87171',
+        marginBottom: 4,
         fontSize: 14,
     },
 });

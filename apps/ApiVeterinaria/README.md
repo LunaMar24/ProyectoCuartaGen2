@@ -418,9 +418,24 @@ La API maneja varios tipos de errores:
 {
   "success": false,
   "message": "Descripción del error",
-  "error": "Detalle específico del error"
+  "code": "CODIGO_INTERNO_ERROR"
 }
 ```
+
+### Códigos internos de error (code)
+
+| code                              | HTTP | Descripción                                                |
+| --------------------------------- | ---- | ---------------------------------------------------------- |
+| EMAIL_ALREADY_EXISTS              | 409  | El email ya existe (validación de usuario en BD).          |
+| EMAIL_ALREADY_EXISTS_OTHER_USER   | 409  | `sp_sincronizar_correo`: correo usado por otro usuario.    |
+| EMAIL_ALREADY_EXISTS_USERS        | 409  | `sp_crear_usuario_y_propietario`: email duplicado en usuarios. |
+| EMAIL_ALREADY_EXISTS_PROPIETARIOS | 409  | `sp_crear_usuario_y_propietario`: email duplicado en propietarios. |
+| CEDULA_ALREADY_EXISTS             | 409  | `sp_crear_usuario_y_propietario`: cédula duplicada.        |
+| PROPIETARIO_NOT_FOUND             | 404  | `sp_eliminar_propietario`: propietario no encontrado.      |
+| SP_VALIDATION_ERROR               | 400  | Error de validación retornado por un procedimiento almacenado. |
+| DUPLICATE_ENTRY                   | 409  | Duplicado genérico detectado por MySQL.                    |
+| USER_CREATE_ERROR                 | 500  | Fallo no controlado al crear usuario.                      |
+| USER_UPDATE_ERROR                 | 500  | Fallo no controlado al actualizar usuario.                 |
 
 ## 🔧 Configuración Avanzada
 

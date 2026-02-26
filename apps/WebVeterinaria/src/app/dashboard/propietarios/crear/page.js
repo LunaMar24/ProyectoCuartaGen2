@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, getApiErrorMessage } from "@/lib/api";
 
 export default function CrearPropietarioPage() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function CrearPropietarioPage() {
         setOk("Propietario creado correctamente");
         setTimeout(() => router.push("/dashboard/propietarios"), 800);
       } else {
-        setError(data?.message || "No se pudo crear el propietario");
+        setError(getApiErrorMessage(data, "No se pudo crear el propietario"));
         const arr = Array.isArray(data?.errors) ? data.errors : [];
         if (arr.length) {
           const byField = {};

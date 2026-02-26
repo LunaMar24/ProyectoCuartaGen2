@@ -95,7 +95,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+5411123\",\n  \"correo\": \"gmail.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellidos\": \"Perez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+5411123\",\n  \"correo\": \"gmail.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios/search", "host": ["{{baseUrl}}"], "path": ["propietarios","search"] }
           }
@@ -124,7 +124,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios", "host": ["{{baseUrl}}"], "path": ["propietarios"] }
           }
@@ -136,7 +136,7 @@
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos Alberto\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\"\n}"
+              "raw": "{\n  \"nombre\": \"Carlos Alberto\",\n  \"apellidos\": \"Gomez\",\n  \"cedula\": \"12345678\",\n  \"telefono\": \"+541112345678\",\n  \"correo\": \"carlos@example.com\",\n  \"usuarioId\": 1\n}"
             },
             "url": { "raw": "{{baseUrl}}/propietarios/1", "host": ["{{baseUrl}}"], "path": ["propietarios","1"] }
           }
@@ -324,11 +324,34 @@
     "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/1", "host": ["{{baseUrl}}"], "path": ["historiales","1"] } }
         },
         {
-          "name": "Crear historial",
+          "name": "Get historial por cita (idCita)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/historiales/cita/3",
+              "host": ["{{baseUrl}}"],
+              "path": ["historiales", "cita", "3"]
+            }
+          }
+        },
+        {
+          "name": "Crear historial (manual)",
           "request": {
             "method": "POST",
             "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
             "body": { "mode": "raw", "raw": "{\n  \"mascota\": 1,\n  \"fechaAtencion\": \"2025-11-01T10:00:00Z\",\n  \"motivo\": \"Consulta por vómitos\",\n  \"diagnostico\": \"Probable gastroenteritis\"\n}" },
+            "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] }
+          }
+        },
+        {
+          "name": "Crear historial desde cita (idCita)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"mascota\": 4,\n  \"idCita\": 3,\n  \"fechaAtencion\": \"2026-02-24T09:00:00Z\",\n  \"motivo\": \"Baño completo\",\n  \"diagnostico\": \"Paciente atendido, sin hallazgos clínicos\"\n}" },
             "url": { "raw": "{{baseUrl}}/historiales", "host": ["{{baseUrl}}"], "path": ["historiales"] }
           }
         },
@@ -366,6 +389,112 @@
         {
           "name": "Estadísticas historiales",
     "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/historiales/stats", "host": ["{{baseUrl}}"], "path": ["historiales","stats"] } }
+        }
+      ]
+    },
+    {
+      "name": "Citas",
+      "item": [
+        {
+          "name": "Listar citas (rango y estado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citas?fechaDesde=2026-03-10T00:00:00&fechaHasta=2026-03-10T23:59:59&estado=P,F&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas"],
+              "query": [
+                { "key": "fechaDesde", "value": "2026-03-10T00:00:00" },
+                { "key": "fechaHasta", "value": "2026-03-10T23:59:59" },
+                { "key": "estado", "value": "P,F" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de cita por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citas/102",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas", "102"]
+            }
+          }
+        },
+        {
+          "name": "Estado de reserva (countdown)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citas/reservas/48/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas", "reservas", "48", "estado"]
+            }
+          }
+        },
+        {
+          "name": "Reservar cita temporal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mascotaId\": 5,\n  \"fechaInicio\": \"2026-03-10T10:00:00\",\n  \"fechaFin\": \"2026-03-10T10:30:00\",\n  \"timeoutMinutos\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/citas/reservar",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas", "reservar"]
+            }
+          }
+        },
+        {
+          "name": "Confirmar reserva y crear cita",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idReserva\": 48,\n  \"motivo\": \"Consulta general\",\n  \"notas\": \"La mascota presenta síntomas de alergia\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/citas/confirmar",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas", "confirmar"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar cita",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/citas/102/cancelar",
+              "host": ["{{baseUrl}}"],
+              "path": ["citas", "102", "cancelar"]
+            }
+          }
         }
       ]
     },
