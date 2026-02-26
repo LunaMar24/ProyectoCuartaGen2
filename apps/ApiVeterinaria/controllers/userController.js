@@ -216,8 +216,7 @@ class UserController {
             }
 
             const { id } = req.params;
-            const { nombre, email, telefono } = req.body;
-            const normalizedTipo = 'A';
+            const { nombre, email, telefono, tipo_Usuario } = req.body;
 
             // Validar que el ID sea un número
             if (isNaN(id)) {
@@ -236,11 +235,27 @@ class UserController {
                 });
             }
 
-            if ((existingUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
-                return res.status(409).json({
+            const currentUserId = req.user?.userId;
+            if (!currentUserId) {
+                return res.status(401).json({
                     success: false,
-                    message: 'No se puede eliminar un usuario cliente desde mantenimiento de usuarios. Debe eliminarlo desde mantenimiento de propietarios.',
-                    code: 'CLIENT_USER_DELETE_BLOCKED'
+                    message: 'Autenticación requerida'
+                });
+            }
+
+            const loggedUser = await User.findById(currentUserId);
+            if (!loggedUser) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Usuario autenticado no válido'
+                });
+            }
+
+            if ((loggedUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'No puedes actualizar usuarios desde Usuarios cuando tu tipo de usuario es cliente. Debes hacerlo desde propietarios.',
+                    code: 'CLIENT_USER_UPDATE_BLOCKED'
                 });
             }
 
@@ -256,6 +271,10 @@ class UserController {
             }
 
             const emailChanged = email && email !== existingUser.email;
+
+            const normalizedTipo = tipo_Usuario
+                ? tipo_Usuario.toString().trim().toUpperCase()
+                : (existingUser.tipo_Usuario || '').toString().trim().toUpperCase();
 
             // Actualizar el usuario
             const updatedUser = await User.update(id, { nombre, email, telefono, tipo_Usuario: normalizedTipo });

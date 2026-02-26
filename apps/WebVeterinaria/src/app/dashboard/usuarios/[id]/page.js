@@ -107,7 +107,11 @@ export default function EditarUsuarioPage() {
       const res = await fetch(`${API_USERS}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` },
-        body: JSON.stringify({ ...form, tipo_Usuario: "A" }),
+        body: JSON.stringify({
+          nombre: form.nombre,
+          email: form.email,
+          telefono: form.telefono,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (data?.success) {
