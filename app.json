@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "f808e98a-fbd9-41f7-b448-73c51c958076"
+      }
+    },
+    "android": {
+      "package": "com.lunamar24.veteCel"
+    }
+  }
+}
