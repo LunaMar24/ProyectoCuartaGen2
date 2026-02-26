@@ -110,6 +110,24 @@ export default function UsuariosListPage() {
       .catch(() => alert("No se pudo eliminar el usuario"));
   };
 
+  const handleResetPassword = (id) => {
+    if (!confirm("¿Resetear la contraseña de este usuario al valor por defecto?")) return;
+    const tk = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    fetch(`${API_USERS}/${id}/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` },
+    })
+      .then((r) => r.json().catch(() => ({})))
+      .then((data) => {
+        if (data?.success) {
+          alert("Contraseña reseteada correctamente");
+          return;
+        }
+        alert(getApiErrorMessage(data, "No se pudo resetear la contraseña"));
+      })
+      .catch(() => alert("No se pudo resetear la contraseña"));
+  };
+
   const handleApplyFilters = (e) => { e?.preventDefault?.(); fetchPage(1, limit, filters); };
   const handleClearFilters = () => { const empty = { nombre: "", email: "", telefono: "", fechaDesde: "", fechaHasta: "" }; setFilters(empty); fetchPage(1, limit, empty); };
 
@@ -206,6 +224,15 @@ export default function UsuariosListPage() {
                               className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-700/60 text-rose-400 hover:text-rose-300">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a2 2 0 012-2h4a2 2 0 012 2m-8 0h10" />
+                        </svg>
+                      </button>
+                      <button
+                        title="Resetear contraseña"
+                        onClick={() => handleResetPassword(id)}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-700/60 text-amber-400 hover:text-amber-300"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 11v2m0 4h.01M7 8V6a5 5 0 1110 0v2m-9 0h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-8a2 2 0 012-2z" />
                         </svg>
                       </button>
                     </div>

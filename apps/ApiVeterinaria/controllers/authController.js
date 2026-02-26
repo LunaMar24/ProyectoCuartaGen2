@@ -214,8 +214,17 @@ class AuthController {
             const { nombre, email, telefono, currentPassword, newPassword, tipo_Usuario } = req.body;
             const normalizedTipo = tipo_Usuario ? tipo_Usuario.toString().trim().toUpperCase() : undefined;
 
-            // Verificar si el usuario existe
-            const existingUser = await User.findByEmailWithPassword(req.user.email);
+            // Verificar si el usuario existe (compatibilidad: preferir email si viene en token; fallback por userId)
+            const tokenEmail = typeof req.user?.email === 'string' ? req.user.email.trim() : '';
+            let existingUser = null;
+
+            if (tokenEmail) {
+                existingUser = await User.findByEmailWithPassword(tokenEmail);
+            }
+            if (!existingUser && userId) {
+                existingUser = await User.findByIdWithPassword(userId);
+            }
+
             if (!existingUser) {
                 return res.status(404).json({
                     success: false,
@@ -223,7 +232,13 @@ class AuthController {
                 });
             }
 
-            let updateData = { nombre, email, telefono };
+            const nextNombre = (nombre === undefined || nombre === null) ? existingUser.nombre : nombre;
+            const nextEmail = (email === undefined || email === null || String(email).trim() === '')
+                ? existingUser.email
+                : String(email).trim();
+            const nextTelefono = (telefono === undefined || telefono === null) ? existingUser.telefono : telefono;
+
+            let updateData = { nombre: nextNombre, email: nextEmail, telefono: nextTelefono };
             if (normalizedTipo) updateData.tipo_Usuario = normalizedTipo;
 
             // Si se quiere cambiar la contraseña
@@ -250,8 +265,8 @@ class AuthController {
             }
 
             // Verificar si el email ya existe en otro usuario
-            if (email !== existingUser.email) {
-                const emailUser = await User.findByEmail(email);
+            if (nextEmail !== existingUser.email) {
+                const emailUser = await User.findByEmail(nextEmail);
                 if (emailUser && emailUser.id !== userId) {
                     return res.status(409).json({
                         success: false,

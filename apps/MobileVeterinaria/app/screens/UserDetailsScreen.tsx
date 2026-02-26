@@ -25,6 +25,7 @@ export default function UserDetailsScreen() {
     return '#a3a3a3';
   };
 
+
   if (!user) {
     return (
       <View style={styles.container}>
@@ -58,6 +59,13 @@ export default function UserDetailsScreen() {
       </Text>
 
       <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.buttonBase, styles.passwordButton]}
+          onPress={() => router.push('/screens/ChangePasswordScreen')}
+        >
+          <Text style={styles.buttonLabel}>Cambiar contraseña</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.buttonBase, styles.primaryButton]}
           onPress={() => router.push('/screens/OwnerProfileScreen')}
@@ -128,6 +136,11 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 16,
     gap: 12,
+  },
+  passwordButton: {
+    backgroundColor: '#0e7490',
+    borderWidth: 1,
+    borderColor: '#22d3ee',
   },
   buttonBase: {
     width: '100%',

@@ -353,6 +353,77 @@ class UserController {
     }
 
     /**
+     * Resetea la contraseña de un usuario al valor por defecto del sistema
+     * @param {Object} req - Objeto de solicitud Express
+     * @param {Object} res - Objeto de respuesta Express
+     * @returns {Promise<void>}
+     */
+    static async resetUserPassword(req, res) {
+        try {
+            const { id } = req.params;
+
+            if (isNaN(id)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El ID debe ser un número válido'
+                });
+            }
+
+            const currentUserId = req.user?.userId;
+            if (!currentUserId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Autenticación requerida'
+                });
+            }
+
+            const loggedUser = await User.findById(currentUserId);
+            if (!loggedUser) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Usuario autenticado no válido'
+                });
+            }
+
+            if ((loggedUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'No tienes permisos para resetear contraseñas de usuarios.',
+                    code: 'CLIENT_USER_PASSWORD_RESET_BLOCKED'
+                });
+            }
+
+            const existingUser = await User.findById(id);
+            if (!existingUser) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuario no encontrado'
+                });
+            }
+
+            const updated = await User.resetPasswordToDefault(id);
+            if (!updated) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'No se pudo resetear la contraseña del usuario'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Contraseña reseteada correctamente'
+            });
+        } catch (error) {
+            console.error('Error en resetUserPassword:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor',
+                error: error.message
+            });
+        }
+    }
+
+    /**
      * Busca usuarios por nombre
      * @param {Object} req - Objeto de solicitud Express
      * @param {Object} res - Objeto de respuesta Express

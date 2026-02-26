@@ -77,6 +77,7 @@ export default function RootLayout() {
           <Stack.Screen name="screens/PetAppointmentScreen" options={{ title: 'Crear cita' }} />
           <Stack.Screen name="screens/PetHistoryScreen" options={{ title: 'Historial Médico' }} />
           <Stack.Screen name="screens/EditOwnerScreen" options={{ title: 'Editar propietario' }} />
+          <Stack.Screen name="screens/ChangePasswordScreen" options={{ title: 'Cambiar contraseña' }} />
         </Stack>
         <StatusBar style="light" translucent={false} backgroundColor="#0b1220" />
       </ThemeProvider>

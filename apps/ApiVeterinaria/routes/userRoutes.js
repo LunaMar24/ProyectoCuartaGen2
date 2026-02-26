@@ -77,6 +77,15 @@ router.post('/', authenticateToken, validateUser, UserController.createUser);
 router.put('/:id', authenticateToken, validateUserId, validateUserUpdate, UserController.updateUser);
 
 /**
+ * @route POST /users/:id/reset-password
+ * @description Resetea la contraseña del usuario al valor por defecto del sistema
+ * @access Private
+ * @param {number} id - ID del usuario a resetear
+ * @returns {Object} Mensaje de confirmación
+ */
+router.post('/:id/reset-password', authenticateToken, validateUserId, UserController.resetUserPassword);
+
+/**
  * @route DELETE /users/:id
  * @description Elimina un usuario
  * @access Public
