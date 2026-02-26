@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/userController');
-const { validateUser, validateUserId } = require('../middleware/validation');
+const { validateUser, validateUserUpdate, validateUserId } = require('../middleware/validation');
 const { authenticateToken } = require('../middleware/auth');
 
 /**
@@ -74,7 +74,7 @@ router.post('/', authenticateToken, validateUser, UserController.createUser);
  * @body {string} telefono - Número de teléfono del usuario (requerido)
  * @returns {Object} Usuario actualizado
  */
-router.put('/:id', authenticateToken, validateUserId, validateUser, UserController.updateUser);
+router.put('/:id', authenticateToken, validateUserId, validateUserUpdate, UserController.updateUser);
 
 /**
  * @route DELETE /users/:id

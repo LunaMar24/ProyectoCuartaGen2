@@ -49,6 +49,41 @@ const validateUser = [
 ];
 
 /**
+ * Validaciones para actualización de usuario (mantenimiento)
+ * No exige tipo_Usuario porque no se edita en esta pantalla.
+ */
+const validateUserUpdate = [
+    body('nombre')
+        .trim()
+        .notEmpty()
+        .withMessage('El nombre es requerido')
+        .isLength({ min: 2, max: 100 })
+        .withMessage('El nombre debe tener entre 2 y 100 caracteres')
+        .matches(/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/)
+        .withMessage('El nombre solo puede contener letras y espacios'),
+
+    body('email')
+        .trim()
+        .notEmpty()
+        .withMessage('El email es requerido')
+        .isEmail()
+        .withMessage('Debe ser un email válido')
+        .normalizeEmail()
+        .matches(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)
+        .withMessage('Formato de correo inválido')
+        .isLength({ max: 255 })
+        .withMessage('El email no puede exceder 255 caracteres'),
+
+    body('telefono')
+        .optional({ nullable: true, checkFalsy: true })
+        .trim()
+        .matches(/^[\+]?[0-9\-\(\)\s]{7,20}$/)
+        .withMessage('Formato de teléfono inválido')
+        .isLength({ min: 7, max: 20 })
+        .withMessage('El teléfono debe tener entre 7 y 20 caracteres')
+];
+
+/**
  * Validaciones para registro de usuario
  * Incluye validación de contraseña
  */
@@ -568,6 +603,7 @@ const validateCitaConfirmacion = [
 
 module.exports = {
     validateUser,
+    validateUserUpdate,
     validateRegister,
     validateLogin,
     validateProfileUpdate,
