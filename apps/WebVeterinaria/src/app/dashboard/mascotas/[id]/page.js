@@ -174,7 +174,7 @@ export default function EditarMascotaPage() {
 
     const token = localStorage.getItem("authToken");
     try {
-      const res = await fetch(`${API_BASE}/mascotas/${id}`, {
+      const res = await fetch(apiUrl(`/mascotas/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({

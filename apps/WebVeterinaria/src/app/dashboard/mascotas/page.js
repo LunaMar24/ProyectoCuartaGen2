@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE } from "@/lib/api";
-const API_PETS = `${API_BASE}/mascotas`;
+import { apiUrl } from "@/lib/api";
+const API_PETS = apiUrl("/mascotas");
 
 export default function MascotasPage() {
   const [items, setItems] = useState([]);

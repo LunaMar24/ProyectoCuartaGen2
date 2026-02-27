@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { API_BASE, getApiErrorMessage } from "@/lib/api";
+import { apiUrl, getApiErrorMessage } from "@/lib/api";
 
-const API_USERS = `${API_BASE}/users`;
+const API_USERS = apiUrl("/users");
 
 export default function EditarUsuarioPage() {
   const router = useRouter();
