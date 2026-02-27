@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE, getApiErrorMessage } from "@/lib/api";
-const API_PROPS = `${API_BASE}/propietarios`;
+import { apiUrl, getApiErrorMessage } from "@/lib/api";
+const API_PROPS = apiUrl("/propietarios");
 
 export default function PropietariosPage() {
   const [items, setItems] = useState([]);

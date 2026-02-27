@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { API_BASE } from "@/lib/api";
-const API_H = `${API_BASE}/historiales`;
+import { apiUrl } from "@/lib/api";
+const API_H = apiUrl("/historiales");
 
 function HistorialesPageContent() {
   const searchParams = useSearchParams();
@@ -139,7 +139,7 @@ function HistorialesPageContent() {
     const tk = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     if (!tk) return;
     // Buscar el nombre de la mascota para mostrarlo
-    fetch(`${API_BASE}/mascotas/${id}`, { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` } })
+    fetch(apiUrl(`/mascotas/${id}`), { method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tk}` } })
       .then((r) => r.json())
       .then((data) => {
         const m = data?.data || data;
