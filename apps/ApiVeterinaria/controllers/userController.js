@@ -235,6 +235,14 @@ class UserController {
                 });
             }
 
+            if ((existingUser.tipo_Usuario || '').toString().trim().toUpperCase() === 'C') {
+                return res.status(409).json({
+                    success: false,
+                    message: 'No se puede actualizar un usuario cliente desde mantenimiento de usuarios. Debe actualizarlo desde mantenimiento de propietarios.',
+                    code: 'CLIENT_USER_UPDATE_BLOCKED'
+                });
+            }
+
             const currentUserId = req.user?.userId;
             if (!currentUserId) {
                 return res.status(401).json({

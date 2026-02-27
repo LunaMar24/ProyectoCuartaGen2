@@ -17,6 +17,7 @@ const API_ERROR_MESSAGES = {
   USER_CREATE_ERROR: "No se pudo crear el usuario.",
   USER_UPDATE_ERROR: "No se pudo actualizar el usuario.",
   CLIENT_USER_DELETE_BLOCKED: "No puedes eliminar un usuario tipo cliente desde Usuarios, debes eliminar el cliente desde propietarios.",
+  CLIENT_USER_UPDATE_BLOCKED: "No puedes actualizar un usuario tipo cliente desde Usuarios, debes hacerlo desde propietarios.",
 };
 
 const getApiErrorMessage = (data, fallback = "Ocurrió un error") => {
