@@ -214,8 +214,13 @@ class PropietarioController {
             const updated = await Propietario.update(id, { nombre, apellidos, cedula, telefono, correo: nextCorreo, usuarioId: nextUsuarioId });
 
             const correoChanged = nextCorreo !== existing.correo;
-            if (usuarioIdChanged || correoChanged) {
+            if (nextUsuarioId && (usuarioIdChanged || correoChanged)) {
                 await User.syncCorreo(nextUsuarioId, nextCorreo);
+            }
+
+            if (nextUsuarioId) {
+                const fullName = `${(nombre || '').trim()} ${(apellidos || '').trim()}`.trim();
+                await User.syncNombreTelefono(nextUsuarioId, fullName, telefono);
             }
 
             res.status(200).json({

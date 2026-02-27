@@ -247,6 +247,25 @@ class User {
     }
 
     /**
+     * Sincroniza nombre y teléfono del usuario a partir del propietario
+     * @param {number} usuarioId - ID del usuario
+     * @param {string} nombre - Nombre completo del usuario
+     * @param {string} telefono - Teléfono del usuario
+     * @returns {Promise<void>}
+     */
+    static async syncNombreTelefono(usuarioId, nombre, telefono) {
+        try {
+            await pool.execute(
+                'UPDATE usuarios SET nombre = ?, telefono = ?, fecha_actualizacion = NOW() WHERE id = ?',
+                [nombre, telefono, usuarioId]
+            );
+        } catch (error) {
+            console.error('Error en User.syncNombreTelefono:', error);
+            throw new Error('Error al sincronizar nombre y teléfono del usuario');
+        }
+    }
+
+    /**
      * Busca un usuario por email para autenticación (incluye password)
      * @param {string} email - Email del usuario
      * @returns {Promise<Object|null>} Usuario encontrado con password o null
